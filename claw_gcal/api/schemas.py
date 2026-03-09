@@ -4,11 +4,13 @@ from __future__ import annotations
 
 from typing import Literal
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class ConferenceProperties(BaseModel):
-    allowedConferenceSolutionTypes: list[str] = ["hangoutsMeet"]
+    allowedConferenceSolutionTypes: list[str] = Field(
+        default_factory=lambda: ["hangoutsMeet"]
+    )
 
 
 class ReminderOverride(BaseModel):
@@ -22,7 +24,7 @@ class NotificationRule(BaseModel):
 
 
 class NotificationSettings(BaseModel):
-    notifications: list[NotificationRule] = []
+    notifications: list[NotificationRule] = Field(default_factory=list)
 
 
 class CalendarListEntry(BaseModel):
@@ -58,6 +60,13 @@ class CalendarListResponse(BaseModel):
     items: list[CalendarListEntry]
     nextPageToken: str | None = None
     nextSyncToken: str | None = None
+
+
+class CalendarInsertRequest(BaseModel):
+    summary: str = ""
+    description: str = ""
+    timeZone: str = "America/Los_Angeles"
+    selected: bool = True
 
 
 class EventDateTime(BaseModel):
@@ -126,3 +135,11 @@ class EventPatchRequest(BaseModel):
     status: str | None = None
     start: EventDateTime | None = None
     end: EventDateTime | None = None
+
+
+class Profile(BaseModel):
+    emailAddress: str
+    displayName: str
+    calendarsTotal: int = 0
+    eventsTotal: int = 0
+    historyId: str = "1"

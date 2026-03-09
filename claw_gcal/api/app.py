@@ -20,7 +20,8 @@ from claw_gcal.state.snapshots import (
 )
 
 from . import calendars, events
-from .deps import get_db, resolve_actor_user_id
+from .deps import get_db, resolve_user_id
+from .schemas import Profile
 
 app = FastAPI(
     title="Mock Google Calendar API",
@@ -119,22 +120,26 @@ app.include_router(events.router, prefix=GCAL_PREFIX, tags=["events"])
 
 
 # --- Quick profile endpoint for environment sanity checks ---
-@app.get(f"{GCAL_PREFIX}/users/me/profile", tags=["profile"])
+@app.get(f"{GCAL_PREFIX}/users/{{userId}}/profile", response_model=Profile, tags=["profile"])
 def get_profile(
+    userId: str,
     db: Session = Depends(get_db),
-    _user_id: str = Depends(resolve_actor_user_id),
+    _user_id: str = Depends(resolve_user_id),
 ):
     user = db.query(User).filter(User.id == _user_id).first()
+    if not user:
+        raise HTTPException(404, f"User {_user_id!r} not found")
+
     calendar_count = db.query(Calendar).filter(Calendar.user_id == _user_id).count()
     event_count = db.query(Event).filter(Event.user_id == _user_id).count()
 
-    return {
-        "emailAddress": user.email_address,
-        "displayName": user.display_name,
-        "calendarsTotal": calendar_count,
-        "eventsTotal": event_count,
-        "historyId": str(user.history_id),
-    }
+    return Profile(
+        emailAddress=user.email_address,
+        displayName=user.display_name,
+        calendarsTotal=calendar_count,
+        eventsTotal=event_count,
+        historyId=str(user.history_id),
+    )
 
 
 # --- Admin endpoints ---
@@ -163,8 +168,8 @@ def admin_seed(scenario: str = "default", seed: int = 42):
         result = seed_database(scenario=scenario, seed=seed)
         action_log.clear()
         return {"status": "ok", "scenario": scenario, **result}
-    except ValueError as exc:
-        raise HTTPException(400, str(exc)) from exc
+    except ValueError as e:
+        raise HTTPException(400, str(e))
 
 
 @app.get("/_admin/state", tags=["admin"])

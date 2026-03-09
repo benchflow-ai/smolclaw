@@ -251,3 +251,13 @@ if HAS_GYM:
         def close(self):
             if self._client:
                 self._client.close()
+else:
+
+    class GCalToolEnv:
+        """Stub when gymnasium is not installed."""
+
+        def __init__(self, *args, **kwargs):
+            raise ImportError(
+                "gymnasium is required for GCalToolEnv. "
+                "Install with: pip install gymnasium"
+            )

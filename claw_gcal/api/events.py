@@ -120,7 +120,7 @@ def events_list(
     list_etag_raw = "|".join([item.etag for item in items])
     updated = _iso(events[-1].updated_at) if events else _iso(datetime.now(timezone.utc))
     token_seed = f"{calendar.id}:{len(events)}:{updated}"
-    next_sync_token = base64url_md5(token_seed)
+    next_sync_token = _md5_hex(token_seed)
     next_page_token = str(maxResults) if total_count > maxResults else None
 
     return EventListResponse(
@@ -270,6 +270,6 @@ def events_delete(
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-def base64url_md5(text: str) -> str:
+def _md5_hex(text: str) -> str:
     digest = hashlib.md5(text.encode("utf-8")).hexdigest()
     return digest

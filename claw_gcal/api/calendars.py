@@ -12,6 +12,7 @@ from claw_gcal.models import Calendar, User
 
 from .deps import get_db, resolve_actor_user_id, resolve_user_id
 from .schemas import (
+    CalendarInsertRequest,
     CalendarListEntry,
     CalendarListResponse,
     CalendarResource,
@@ -131,7 +132,11 @@ def calendar_list_get(
     return _to_calendar_entry(calendar)
 
 
-@router.get("/calendars/{calendarId}", response_model=CalendarResource, response_model_exclude_none=True)
+@router.get(
+    "/calendars/{calendarId}",
+    response_model=CalendarResource,
+    response_model_exclude_none=True,
+)
 def calendars_get(
     calendarId: str,
     db: Session = Depends(get_db),
@@ -143,11 +148,11 @@ def calendars_get(
 
 @router.post("/calendars", response_model=CalendarResource, response_model_exclude_none=True)
 def calendars_insert(
-    body: dict,
+    body: CalendarInsertRequest,
     db: Session = Depends(get_db),
     _user_id: str = Depends(resolve_actor_user_id),
 ):
-    summary = str(body.get("summary", "")).strip()
+    summary = body.summary.strip()
     if not summary:
         raise HTTPException(400, "Missing required field: summary")
 
@@ -155,11 +160,11 @@ def calendars_insert(
         id=f"cal_{uuid.uuid4().hex[:12]}",
         user_id=_user_id,
         summary=summary,
-        description=str(body.get("description", "")),
-        timezone=str(body.get("timeZone", "America/Los_Angeles")),
+        description=body.description,
+        timezone=body.timeZone,
         access_role="owner",
         is_primary=False,
-        selected=bool(body.get("selected", True)),
+        selected=body.selected,
     )
     db.add(calendar)
     db.commit()
