@@ -28,6 +28,9 @@ class Event(Base):
     etag: Mapped[str] = mapped_column(String, default="")
     i_cal_uid: Mapped[str] = mapped_column(String, default="")
     sequence: Mapped[int] = mapped_column(Integer, default=0)
+    recurrence_json: Mapped[str] = mapped_column(Text, default="[]")
+    recurring_event_id: Mapped[str] = mapped_column(String, default="")
+    original_start_time: Mapped[str] = mapped_column(String, default="")
 
     calendar = relationship("Calendar", back_populates="events")
     user = relationship("User", back_populates="events")

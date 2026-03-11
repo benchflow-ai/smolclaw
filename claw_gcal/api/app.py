@@ -19,7 +19,7 @@ from claw_gcal.state.snapshots import (
     take_snapshot,
 )
 
-from . import calendars, events
+from . import acl, calendars, channels, colors, events, freebusy, settings
 from .deps import get_db, resolve_user_id
 from .schemas import Profile
 
@@ -125,6 +125,11 @@ GCAL_PREFIX = "/calendar/v3"
 
 app.include_router(calendars.router, prefix=GCAL_PREFIX, tags=["calendars"])
 app.include_router(events.router, prefix=GCAL_PREFIX, tags=["events"])
+app.include_router(acl.router, prefix=GCAL_PREFIX, tags=["acl"])
+app.include_router(colors.router, prefix=GCAL_PREFIX, tags=["colors"])
+app.include_router(freebusy.router, prefix=GCAL_PREFIX, tags=["freebusy"])
+app.include_router(settings.router, prefix=GCAL_PREFIX, tags=["settings"])
+app.include_router(channels.router, prefix=GCAL_PREFIX, tags=["channels"])
 
 
 # --- Profile ---

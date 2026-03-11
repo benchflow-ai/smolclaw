@@ -5,7 +5,15 @@ from __future__ import annotations
 import random
 from datetime import datetime, timedelta, timezone
 
-from claw_gcal.models import Calendar, Event, User, get_session_factory, init_db, reset_engine
+from claw_gcal.models import (
+    AclRule,
+    Calendar,
+    Event,
+    User,
+    get_session_factory,
+    init_db,
+    reset_engine,
+)
 from claw_gcal.state.snapshots import take_snapshot
 
 
@@ -17,6 +25,12 @@ def _mk_calendar_id(user_email: str, suffix: str = "primary") -> str:
     if suffix == "primary":
         return user_email
     return f"{suffix}-{user_email}"
+
+
+def _mk_acl_id(scope_type: str, scope_value: str) -> str:
+    if scope_type == "default":
+        return "default"
+    return f"{scope_type}:{scope_value or ''}"
 
 
 def seed_database(
@@ -73,24 +87,48 @@ def seed_database(
                 user_id=user_id,
                 summary="Primary Calendar",
                 description="Main personal calendar",
+                location="",
                 timezone="America/Los_Angeles",
                 access_role="owner",
                 is_primary=True,
                 selected=True,
+                hidden=False,
+                summary_override="",
+                auto_accept_invitations=False,
+                color_id="14",
             )
             team = Calendar(
                 id=team_calendar_id,
                 user_id=user_id,
                 summary="Team Calendar",
                 description="Shared team events",
+                location="",
                 timezone="America/Los_Angeles",
                 access_role="owner",
                 is_primary=False,
                 selected=True,
+                hidden=False,
+                summary_override="",
+                auto_accept_invitations=False,
+                color_id="9",
             )
 
             db.add(primary)
             db.add(team)
+
+            # Owner ACL for each owned calendar (mirrors real owner access).
+            for cal_id in (primary_calendar_id, team_calendar_id):
+                rule_id = _mk_acl_id("user", email)
+                db.add(
+                    AclRule(
+                        id=f"{cal_id}:{rule_id}",
+                        calendar_id=cal_id,
+                        scope_type="user",
+                        scope_value=email,
+                        role="owner",
+                        etag=f'"{cal_id}:{rule_id}:owner"',
+                    )
+                )
 
             # Primary events
             for j in range(per_user_events):
@@ -115,6 +153,9 @@ def seed_database(
                         etag=f'"{event_id}-v1"',
                         i_cal_uid=f"{event_id}@smolclaw.local",
                         sequence=0,
+                        recurrence_json="[]",
+                        recurring_event_id="",
+                        original_start_time="",
                     )
                 )
 
@@ -136,6 +177,9 @@ def seed_database(
                     etag=f'"evt_team_u{idx:02d}-v1"',
                     i_cal_uid=f"evt_team_u{idx:02d}@smolclaw.local",
                     sequence=0,
+                    recurrence_json="[]",
+                    recurring_event_id="",
+                    original_start_time="",
                 )
             )
 

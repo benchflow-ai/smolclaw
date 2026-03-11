@@ -21,10 +21,12 @@ def get_db() -> Session:
 def _resolve_header_user(
     db: Session,
     x_claw_gcal_user: str | None,
+    x_mock_gcal_user: str | None = None,
 ) -> str | None:
-    if x_claw_gcal_user:
+    candidate = x_claw_gcal_user or x_mock_gcal_user
+    if candidate:
         user = db.query(User).filter(
-            (User.id == x_claw_gcal_user) | (User.email_address == x_claw_gcal_user)
+            (User.id == candidate) | (User.email_address == candidate)
         ).first()
         if user:
             return user.id
@@ -34,6 +36,7 @@ def _resolve_header_user(
 def resolve_user_id(
     userId: str,
     x_claw_gcal_user: str | None = Header(None),
+    x_mock_gcal_user: str | None = Header(None),
     db: Session = Depends(get_db),
 ) -> str:
     """Resolve 'me' to the actual user ID.
@@ -46,7 +49,7 @@ def resolve_user_id(
             raise HTTPException(404, f"User {userId!r} not found")
         return userId
 
-    resolved = _resolve_header_user(db, x_claw_gcal_user)
+    resolved = _resolve_header_user(db, x_claw_gcal_user, x_mock_gcal_user)
     if resolved:
         return resolved
 
@@ -59,10 +62,11 @@ def resolve_user_id(
 
 def resolve_actor_user_id(
     x_claw_gcal_user: str | None = Header(None),
+    x_mock_gcal_user: str | None = Header(None),
     db: Session = Depends(get_db),
 ) -> str:
     """Resolve actor for endpoints without userId path params."""
-    resolved = _resolve_header_user(db, x_claw_gcal_user)
+    resolved = _resolve_header_user(db, x_claw_gcal_user, x_mock_gcal_user)
     if resolved:
         return resolved
 

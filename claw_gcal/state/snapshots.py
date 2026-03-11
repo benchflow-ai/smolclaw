@@ -8,7 +8,7 @@ from pathlib import Path
 
 from sqlalchemy.orm import Session
 
-from claw_gcal.models import Calendar, Event, User, get_session_factory
+from claw_gcal.models import AclRule, Calendar, Event, User, get_session_factory
 
 SNAPSHOTS_DIR = Path(__file__).resolve().parent.parent.parent / ".data" / "snapshots_gcal"
 
@@ -29,8 +29,31 @@ def _serialize_events(db: Session, user_id: str) -> list[dict]:
             "etag": e.etag,
             "iCalUID": e.i_cal_uid,
             "sequence": e.sequence,
+            "recurrence": e.recurrence_json,
+            "recurringEventId": e.recurring_event_id,
+            "originalStartTime": e.original_start_time,
         }
         for e in events
+    ]
+
+
+def _serialize_acls(db: Session, user_id: str) -> list[dict]:
+    rows = (
+        db.query(AclRule)
+        .join(Calendar, Calendar.id == AclRule.calendar_id)
+        .filter(Calendar.user_id == user_id)
+        .all()
+    )
+    return [
+        {
+            "id": r.id,
+            "calendarId": r.calendar_id,
+            "scopeType": r.scope_type,
+            "scopeValue": r.scope_value,
+            "role": r.role,
+            "etag": r.etag,
+        }
+        for r in rows
     ]
 
 
@@ -49,13 +72,19 @@ def _serialize_user(db: Session, user: User) -> dict:
                 "id": c.id,
                 "summary": c.summary,
                 "description": c.description,
+                "location": c.location,
                 "timeZone": c.timezone,
                 "accessRole": c.access_role,
                 "primary": c.is_primary,
                 "selected": c.selected,
+                "hidden": c.hidden,
+                "summaryOverride": c.summary_override,
+                "autoAcceptInvitations": c.auto_accept_invitations,
+                "colorId": c.color_id,
             }
             for c in calendars
         ],
+        "acls": _serialize_acls(db, user.id),
         "events": _serialize_events(db, user.id),
     }
 
@@ -126,10 +155,27 @@ def _restore_from_state(state: dict):
                         user_id=user_id,
                         summary=cal["summary"],
                         description=cal.get("description", ""),
+                        location=cal.get("location", ""),
                         timezone=cal.get("timeZone", "America/Los_Angeles"),
                         access_role=cal.get("accessRole", "owner"),
                         is_primary=cal.get("primary", False),
                         selected=cal.get("selected", True),
+                        hidden=cal.get("hidden", False),
+                        summary_override=cal.get("summaryOverride", ""),
+                        auto_accept_invitations=cal.get("autoAcceptInvitations", False),
+                        color_id=cal.get("colorId", "9"),
+                    )
+                )
+
+            for acl in user_data.get("acls", []):
+                db.add(
+                    AclRule(
+                        id=acl["id"],
+                        calendar_id=acl["calendarId"],
+                        scope_type=acl.get("scopeType", "user"),
+                        scope_value=acl.get("scopeValue", ""),
+                        role=acl.get("role", "reader"),
+                        etag=acl.get("etag", ""),
                     )
                 )
 
@@ -151,6 +197,9 @@ def _restore_from_state(state: dict):
                         etag=event.get("etag", ""),
                         i_cal_uid=event.get("iCalUID", ""),
                         sequence=event.get("sequence", 0),
+                        recurrence_json=event.get("recurrence", "[]"),
+                        recurring_event_id=event.get("recurringEventId", ""),
+                        original_start_time=event.get("originalStartTime", ""),
                     )
                 )
 
@@ -206,6 +255,10 @@ def get_diff() -> dict:
             "calendars": _diff_items(
                 init_user.get("calendars", []),
                 curr_user.get("calendars", []),
+            ),
+            "acls": _diff_items(
+                init_user.get("acls", []),
+                curr_user.get("acls", []),
             ),
             "events": _diff_items(
                 init_user.get("events", []),

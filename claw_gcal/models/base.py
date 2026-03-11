@@ -65,6 +65,10 @@ def reset_engine():
         _engine.dispose()
     _engine = None
     _SessionLocal = None
+    # Also clear in-memory channel registry used by watch/stop endpoints.
+    from claw_gcal.state.channels import channel_registry
+
+    channel_registry.clear()
 
 
 def init_db(db_path: str | Path | None = None):
