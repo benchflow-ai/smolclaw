@@ -479,3 +479,69 @@ class TestSettingsColorsFreebusyChannels:
             json={"id": "does-not-exist", "resourceId": "unknown"},
         )
         assert resp.status_code == 404
+
+
+class TestHealthProfileAdmin:
+    def test_health_and_profile(self, gcal_client):
+        health = gcal_client.get("/health")
+        assert health.status_code == 200
+        assert health.json()["status"] == "ok"
+
+        profile = gcal_client.get("/calendar/v3/users/me/profile")
+        assert profile.status_code == 200
+        data = profile.json()
+        assert data["emailAddress"] == "alex@nexusai.com"
+        assert data["displayName"] == "Alex Chen"
+        assert data["calendarsTotal"] > 0
+        assert data["eventsTotal"] > 0
+        assert data["historyId"].isdigit()
+
+    def test_admin_state_diff_action_log_snapshot_restore_reset(self, gcal_client):
+        state = gcal_client.get("/_admin/state")
+        assert state.status_code == 200
+        state_data = state.json()
+        assert "users" in state_data
+        assert "user1" in state_data["users"]
+
+        diff = gcal_client.get("/_admin/diff")
+        assert diff.status_code == 200
+        assert "users" in diff.json()
+
+        # Generate activity then verify audit trail.
+        gcal_client.get("/calendar/v3/users/me/calendarList")
+        log = gcal_client.get("/_admin/action_log")
+        assert log.status_code == 200
+        log_data = log.json()
+        assert "entries" in log_data
+        assert log_data["count"] >= 1
+
+        create = gcal_client.post("/calendar/v3/calendars", json={"summary": "Admin Snapshot"})
+        assert create.status_code == 200
+        cal_id = create.json()["id"]
+
+        snap = gcal_client.post("/_admin/snapshot/gcal_admin_test")
+        assert snap.status_code == 200
+        assert snap.json()["status"] == "ok"
+
+        patch = gcal_client.patch(
+            f"/calendar/v3/calendars/{cal_id}",
+            json={"summary": "Mutated"},
+        )
+        assert patch.status_code == 200
+        assert patch.json()["summary"] == "Mutated"
+
+        restore = gcal_client.post("/_admin/restore/gcal_admin_test")
+        assert restore.status_code == 200
+        assert restore.json()["status"] == "ok"
+
+        after = gcal_client.get(f"/calendar/v3/calendars/{cal_id}")
+        assert after.status_code == 200
+        assert after.json()["summary"] == "Admin Snapshot"
+
+        tasks = gcal_client.get("/_admin/tasks")
+        assert tasks.status_code == 200
+        assert "tasks" in tasks.json()
+
+        reset = gcal_client.post("/_admin/reset")
+        assert reset.status_code == 200
+        assert reset.json()["status"] == "ok"

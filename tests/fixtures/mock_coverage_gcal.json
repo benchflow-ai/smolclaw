@@ -56,6 +56,7 @@
       "fixture": "acl_patch_response.json",
       "tests": [
         "tests/test_gcal_api.py::TestAcl::test_acl_crud",
+        "tests/test_gcal_api.py::TestAcl::test_acl_patch_default_writer_rejected",
         "tests/test_gcal_conformance.py::TestWriteConformance::test_acl_insert_patch_update_get_shapes"
       ]
     },
@@ -79,7 +80,7 @@
       "implemented": true,
       "fixture": null,
       "tests": [
-        "tests/test_gcal_api.py::TestWatchAndChannels::test_watch_and_stop"
+        "tests/test_gcal_api.py::TestAcl::test_acl_watch"
       ]
     },
     {
@@ -89,7 +90,9 @@
       "path": "/users/me/calendarList/{calendarId}",
       "implemented": true,
       "fixture": null,
-      "tests": []
+      "tests": [
+        "tests/test_gcal_api.py::TestCalendarList::test_delete_owned_calendar_list_entry_forbidden"
+      ]
     },
     {
       "id": "calendar.calendarList.get",
@@ -99,7 +102,7 @@
       "implemented": true,
       "fixture": "calendarlist_get_primary.json",
       "tests": [
-        "tests/test_gcal_api.py::TestCalendarListAndCalendars::test_calendar_list_get_primary",
+        "tests/test_gcal_api.py::TestCalendarList::test_list_and_get",
         "tests/test_gcal_conformance.py::TestCalendarReadsConformance::test_calendarlist_get_primary_shape"
       ]
     },
@@ -110,7 +113,9 @@
       "path": "/users/me/calendarList",
       "implemented": true,
       "fixture": null,
-      "tests": []
+      "tests": [
+        "tests/test_gcal_api.py::TestCalendarList::test_insert_patch_update"
+      ]
     },
     {
       "id": "calendar.calendarList.list",
@@ -120,7 +125,8 @@
       "implemented": true,
       "fixture": "calendarlist_list.json",
       "tests": [
-        "tests/test_gcal_api.py::TestCalendarListAndCalendars::test_calendar_list",
+        "tests/test_gcal_api.py::TestCalendarList::test_list_and_get",
+        "tests/test_gcal_api.py::TestCalendarList::test_list_pagination_uses_next_page_token",
         "tests/test_gcal_conformance.py::TestCalendarReadsConformance::test_calendarlist_list_shape"
       ]
     },
@@ -131,7 +137,10 @@
       "path": "/users/me/calendarList/{calendarId}",
       "implemented": true,
       "fixture": null,
-      "tests": []
+      "tests": [
+        "tests/test_gcal_api.py::TestCalendarList::test_insert_patch_update",
+        "tests/test_gcal_api.py::TestCalendarList::test_patch_update_include_description_key_for_secondary"
+      ]
     },
     {
       "id": "calendar.calendarList.update",
@@ -140,7 +149,10 @@
       "path": "/users/me/calendarList/{calendarId}",
       "implemented": true,
       "fixture": null,
-      "tests": []
+      "tests": [
+        "tests/test_gcal_api.py::TestCalendarList::test_insert_patch_update",
+        "tests/test_gcal_api.py::TestCalendarList::test_patch_update_include_description_key_for_secondary"
+      ]
     },
     {
       "id": "calendar.calendarList.watch",
@@ -149,7 +161,9 @@
       "path": "/users/me/calendarList/watch",
       "implemented": true,
       "fixture": null,
-      "tests": []
+      "tests": [
+        "tests/test_gcal_api.py::TestCalendarList::test_watch"
+      ]
     },
     {
       "id": "calendar.calendars.clear",
@@ -159,7 +173,8 @@
       "implemented": true,
       "fixture": null,
       "tests": [
-        "tests/test_gcal_api.py::TestCalendarListAndCalendars::test_calendar_insert_patch_update_delete"
+        "tests/test_gcal_api.py::TestCalendars::test_clear_primary",
+        "tests/test_gcal_api.py::TestCalendars::test_clear_non_primary_returns_invalid_value"
       ]
     },
     {
@@ -170,7 +185,7 @@
       "implemented": true,
       "fixture": null,
       "tests": [
-        "tests/test_gcal_api.py::TestCalendarListAndCalendars::test_calendar_insert_patch_update_delete"
+        "tests/test_gcal_api.py::TestCalendars::test_get_patch_update_delete"
       ]
     },
     {
@@ -181,6 +196,7 @@
       "implemented": true,
       "fixture": "calendars_get_primary.json",
       "tests": [
+        "tests/test_gcal_api.py::TestCalendars::test_get_patch_update_delete",
         "tests/test_gcal_conformance.py::TestCalendarReadsConformance::test_calendars_get_primary_shape"
       ]
     },
@@ -192,7 +208,7 @@
       "implemented": true,
       "fixture": "calendars_insert_response.json",
       "tests": [
-        "tests/test_gcal_api.py::TestCalendarListAndCalendars::test_calendar_insert_patch_update_delete",
+        "tests/test_gcal_api.py::TestCalendars::test_get_patch_update_delete",
         "tests/test_gcal_conformance.py::TestWriteConformance::test_calendars_insert_patch_update_shapes"
       ]
     },
@@ -204,7 +220,8 @@
       "implemented": true,
       "fixture": "calendars_patch_response.json",
       "tests": [
-        "tests/test_gcal_api.py::TestCalendarListAndCalendars::test_calendar_insert_patch_update_delete",
+        "tests/test_gcal_api.py::TestCalendars::test_get_patch_update_delete",
+        "tests/test_gcal_api.py::TestCalendars::test_patch_includes_description_key_for_secondary",
         "tests/test_gcal_conformance.py::TestWriteConformance::test_calendars_insert_patch_update_shapes"
       ]
     },
@@ -216,7 +233,7 @@
       "implemented": true,
       "fixture": "calendars_update_response.json",
       "tests": [
-        "tests/test_gcal_api.py::TestCalendarListAndCalendars::test_calendar_insert_patch_update_delete",
+        "tests/test_gcal_api.py::TestCalendars::test_get_patch_update_delete",
         "tests/test_gcal_conformance.py::TestWriteConformance::test_calendars_insert_patch_update_shapes"
       ]
     },
@@ -228,7 +245,8 @@
       "implemented": true,
       "fixture": "channels_stop_response.json",
       "tests": [
-        "tests/test_gcal_api.py::TestWatchAndChannels::test_watch_and_stop"
+        "tests/test_gcal_api.py::TestSettingsColorsFreebusyChannels::test_settings_list_get_watch",
+        "tests/test_gcal_api.py::TestSettingsColorsFreebusyChannels::test_channels_stop_unknown"
       ]
     },
     {
@@ -239,7 +257,7 @@
       "implemented": true,
       "fixture": "colors_get.json",
       "tests": [
-        "tests/test_gcal_api.py::TestSettingsColorsFreebusy::test_colors_get",
+        "tests/test_gcal_api.py::TestSettingsColorsFreebusyChannels::test_colors_and_freebusy",
         "tests/test_gcal_conformance.py::TestSettingsAndMetaConformance::test_colors_shape"
       ]
     },
@@ -251,7 +269,7 @@
       "implemented": true,
       "fixture": null,
       "tests": [
-        "tests/test_gcal_api.py::TestEvents::test_events_insert_patch_update_delete"
+        "tests/test_gcal_api.py::TestEvents::test_update_import_instances_move_quickadd_delete"
       ]
     },
     {
@@ -262,7 +280,7 @@
       "implemented": true,
       "fixture": "events_get_primary.json",
       "tests": [
-        "tests/test_gcal_api.py::TestEvents::test_events_list_and_get",
+        "tests/test_gcal_api.py::TestEvents::test_snapshot_restore_preserves_event_timestamps",
         "tests/test_gcal_conformance.py::TestCalendarReadsConformance::test_events_get_shape"
       ]
     },
@@ -274,7 +292,7 @@
       "implemented": true,
       "fixture": "events_import_response.json",
       "tests": [
-        "tests/test_gcal_api.py::TestEvents::test_events_import_move_instances_quick_add"
+        "tests/test_gcal_api.py::TestEvents::test_update_import_instances_move_quickadd_delete"
       ]
     },
     {
@@ -285,7 +303,10 @@
       "implemented": true,
       "fixture": "events_insert_response.json",
       "tests": [
-        "tests/test_gcal_api.py::TestEvents::test_events_insert_patch_update_delete",
+        "tests/test_gcal_api.py::TestEvents::test_update_import_instances_move_quickadd_delete",
+        "tests/test_gcal_api.py::TestEvents::test_list_with_filters_omits_next_sync_token",
+        "tests/test_gcal_api.py::TestEvents::test_instances_expands_recurrence_and_supports_pagination",
+        "tests/test_gcal_api.py::TestEvents::test_snapshot_restore_preserves_event_timestamps",
         "tests/test_gcal_conformance.py::TestWriteConformance::test_events_insert_patch_update_shapes"
       ]
     },
@@ -297,7 +318,8 @@
       "implemented": true,
       "fixture": "events_instances_response.json",
       "tests": [
-        "tests/test_gcal_api.py::TestEvents::test_events_import_move_instances_quick_add"
+        "tests/test_gcal_api.py::TestEvents::test_update_import_instances_move_quickadd_delete",
+        "tests/test_gcal_api.py::TestEvents::test_instances_expands_recurrence_and_supports_pagination"
       ]
     },
     {
@@ -308,7 +330,7 @@
       "implemented": true,
       "fixture": "events_list_primary.json",
       "tests": [
-        "tests/test_gcal_api.py::TestEvents::test_events_list_and_get",
+        "tests/test_gcal_api.py::TestEvents::test_list_with_filters_omits_next_sync_token",
         "tests/test_gcal_conformance.py::TestCalendarReadsConformance::test_events_list_shape"
       ]
     },
@@ -320,7 +342,7 @@
       "implemented": true,
       "fixture": null,
       "tests": [
-        "tests/test_gcal_api.py::TestEvents::test_events_import_move_instances_quick_add"
+        "tests/test_gcal_api.py::TestEvents::test_update_import_instances_move_quickadd_delete"
       ]
     },
     {
@@ -331,7 +353,7 @@
       "implemented": true,
       "fixture": "events_patch_response.json",
       "tests": [
-        "tests/test_gcal_api.py::TestEvents::test_events_insert_patch_update_delete",
+        "tests/test_gcal_api.py::TestEvents::test_snapshot_restore_preserves_event_timestamps",
         "tests/test_gcal_conformance.py::TestWriteConformance::test_events_insert_patch_update_shapes"
       ]
     },
@@ -343,7 +365,7 @@
       "implemented": true,
       "fixture": "events_quickadd_response.json",
       "tests": [
-        "tests/test_gcal_api.py::TestEvents::test_events_import_move_instances_quick_add"
+        "tests/test_gcal_api.py::TestEvents::test_update_import_instances_move_quickadd_delete"
       ]
     },
     {
@@ -354,7 +376,7 @@
       "implemented": true,
       "fixture": "events_update_response.json",
       "tests": [
-        "tests/test_gcal_api.py::TestEvents::test_events_insert_patch_update_delete",
+        "tests/test_gcal_api.py::TestEvents::test_update_import_instances_move_quickadd_delete",
         "tests/test_gcal_conformance.py::TestWriteConformance::test_events_insert_patch_update_shapes"
       ]
     },
@@ -366,7 +388,7 @@
       "implemented": true,
       "fixture": "events_watch_response.json",
       "tests": [
-        "tests/test_gcal_api.py::TestWatchAndChannels::test_watch_and_stop",
+        "tests/test_gcal_api.py::TestEvents::test_watch",
         "tests/test_gcal_conformance.py::TestWriteConformance::test_events_watch_shape"
       ]
     },
@@ -378,7 +400,7 @@
       "implemented": true,
       "fixture": "freebusy_query_primary.json",
       "tests": [
-        "tests/test_gcal_api.py::TestSettingsColorsFreebusy::test_freebusy_query",
+        "tests/test_gcal_api.py::TestSettingsColorsFreebusyChannels::test_colors_and_freebusy",
         "tests/test_gcal_conformance.py::TestSettingsAndMetaConformance::test_freebusy_shape"
       ]
     },
@@ -390,7 +412,7 @@
       "implemented": true,
       "fixture": "settings_get_timezone.json",
       "tests": [
-        "tests/test_gcal_api.py::TestSettingsColorsFreebusy::test_settings_list_and_get",
+        "tests/test_gcal_api.py::TestSettingsColorsFreebusyChannels::test_settings_list_get_watch",
         "tests/test_gcal_conformance.py::TestSettingsAndMetaConformance::test_settings_get_shape"
       ]
     },
@@ -402,7 +424,7 @@
       "implemented": true,
       "fixture": "settings_list.json",
       "tests": [
-        "tests/test_gcal_api.py::TestSettingsColorsFreebusy::test_settings_list_and_get",
+        "tests/test_gcal_api.py::TestSettingsColorsFreebusyChannels::test_settings_list_get_watch",
         "tests/test_gcal_conformance.py::TestSettingsAndMetaConformance::test_settings_list_shape"
       ]
     },
@@ -414,7 +436,7 @@
       "implemented": true,
       "fixture": null,
       "tests": [
-        "tests/test_gcal_api.py::TestWatchAndChannels::test_watch_and_stop"
+        "tests/test_gcal_api.py::TestSettingsColorsFreebusyChannels::test_settings_list_get_watch"
       ]
     },
     {
@@ -425,7 +447,7 @@
       "implemented": true,
       "fixture": null,
       "tests": [
-        "tests/test_gcal_api.py::TestAdmin::test_admin_state_diff_and_tasks"
+        "tests/test_gcal_api.py::TestHealthProfileAdmin::test_health_and_profile"
       ]
     }
   ]
