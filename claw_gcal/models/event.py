@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from sqlalchemy import DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .base import Base
@@ -22,6 +22,8 @@ class Event(Base):
     status: Mapped[str] = mapped_column(String, default="confirmed")
     start_dt: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     end_dt: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    start_is_date: Mapped[bool] = mapped_column(Boolean, default=False)
+    end_is_date: Mapped[bool] = mapped_column(Boolean, default=False)
     attendees_json: Mapped[str] = mapped_column(Text, default="[]")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)

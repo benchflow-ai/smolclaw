@@ -197,6 +197,8 @@ def _insert_event(
         status=materialized["status"],
         start_dt=start_dt,
         end_dt=end_dt,
+        start_is_date=bool(materialized["all_day"]),
+        end_is_date=bool(materialized["all_day"]),
         attendees_json=_attendees_json(materialized["attendee_keys"]),
         created_at=created_at,
         updated_at=created_at,

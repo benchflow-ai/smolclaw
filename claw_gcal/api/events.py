@@ -42,13 +42,13 @@ def _parse_rfc3339(value: str) -> datetime:
     return dt
 
 
-def _parse_event_datetime(dt_value: EventDateTime, tz_name: str) -> datetime:
+def _parse_event_datetime(dt_value: EventDateTime, tz_name: str) -> tuple[datetime, bool]:
     if dt_value.dateTime:
-        return _parse_rfc3339(dt_value.dateTime)
+        return _parse_rfc3339(dt_value.dateTime), False
     if dt_value.date:
         # Store all-day values as midnight in calendar timezone (serialized in UTC).
         day = datetime.fromisoformat(dt_value.date).date()
-        return datetime.combine(day, time.min, tzinfo=timezone.utc)
+        return datetime.combine(day, time.min, tzinfo=timezone.utc), True
     raise HTTPException(400, "Missing event datetime value")
 
 
@@ -60,6 +60,21 @@ def _as_aware_utc(dt: datetime) -> datetime:
     if dt.tzinfo is None:
         return dt.replace(tzinfo=timezone.utc)
     return dt.astimezone(timezone.utc)
+
+
+def _event_date_str(dt: datetime) -> str:
+    return _as_aware_utc(dt).date().isoformat()
+
+
+def _event_datetime_resource(
+    *,
+    dt: datetime,
+    is_date: bool,
+    tz_name: str,
+) -> EventDateTime:
+    if is_date:
+        return EventDateTime(date=_event_date_str(dt))
+    return EventDateTime(dateTime=_iso(dt), timeZone=tz_name)
 
 
 def _compute_event_etag(event: Event) -> str:
@@ -280,15 +295,30 @@ def _to_instance_resource(
     end_iso = _iso(end_dt)
     instance_id = f"{event.id}_{start_dt.astimezone(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}"
     instance_etag = f'"{_md5_hex(f"{event.id}:{start_iso}:{end_iso}:{event.updated_at.isoformat()}:{event.sequence}")}"'
+    start_value = _event_datetime_resource(
+        dt=start_dt,
+        is_date=bool(event.start_is_date),
+        tz_name=time_zone,
+    )
+    end_value = _event_datetime_resource(
+        dt=end_dt,
+        is_date=bool(event.end_is_date),
+        tz_name=time_zone,
+    )
+    original_start = (
+        EventDateTime(date=_event_date_str(start_dt))
+        if event.start_is_date
+        else EventDateTime(dateTime=start_iso, timeZone=time_zone)
+    )
     return base.model_copy(
         update={
             "id": instance_id,
             "etag": instance_etag,
-            "start": EventDateTime(dateTime=start_iso, timeZone=time_zone),
-            "end": EventDateTime(dateTime=end_iso, timeZone=time_zone),
+            "start": start_value,
+            "end": end_value,
             "recurrence": None,
             "recurringEventId": event.id,
-            "originalStartTime": EventDateTime(dateTime=start_iso, timeZone=time_zone),
+            "originalStartTime": original_start,
         }
     )
 
@@ -299,11 +329,12 @@ def _to_event_resource(event: Event) -> EventResource:
     organizer_name = event.calendar.summary if event.calendar else None
 
     recurrence = _deserialize_recurrence(event.recurrence_json)
-    original_start = (
-        EventDateTime(dateTime=event.original_start_time, timeZone=tz)
-        if event.original_start_time
-        else None
-    )
+    original_start = None
+    if event.original_start_time:
+        if event.start_is_date:
+            original_start = EventDateTime(date=event.original_start_time)
+        else:
+            original_start = EventDateTime(dateTime=event.original_start_time, timeZone=tz)
 
     return EventResource(
         etag=event.etag or _compute_event_etag(event),
@@ -317,8 +348,16 @@ def _to_event_resource(event: Event) -> EventResource:
         location=event.location or None,
         iCalUID=event.i_cal_uid,
         sequence=event.sequence,
-        start=EventDateTime(dateTime=_iso(event.start_dt), timeZone=tz),
-        end=EventDateTime(dateTime=_iso(event.end_dt), timeZone=tz),
+        start=_event_datetime_resource(
+            dt=event.start_dt,
+            is_date=bool(event.start_is_date),
+            tz_name=tz,
+        ),
+        end=_event_datetime_resource(
+            dt=event.end_dt,
+            is_date=bool(event.end_is_date),
+            tz_name=tz,
+        ),
         creator=EventActor(email=actor_email, self=True) if actor_email else None,
         organizer=EventActor(email=actor_email, self=True, displayName=organizer_name) if actor_email else None,
         reminders=EventReminders(useDefault=True),
@@ -337,18 +376,105 @@ def _query_events_base(
     timeMin: str | None,
     timeMax: str | None,
     showDeleted: bool,
-) -> tuple[list[Event], int]:
+    include_recurrence_parents: bool = False,
+) -> tuple[Any, int]:
     query = db.query(Event).filter(Event.calendar_id == calendar.id)
     if not showDeleted:
         query = query.filter(Event.status != "cancelled")
     if q:
         query = query.filter((Event.summary.contains(q)) | (Event.description.contains(q)))
-    if timeMin:
+    # For singleEvents expansion we must not filter recurring masters by their
+    # original start/end, otherwise later instances can be dropped.
+    if timeMin and not include_recurrence_parents:
         query = query.filter(Event.end_dt >= _parse_rfc3339(timeMin))
-    if timeMax:
+    if timeMax and not include_recurrence_parents:
         query = query.filter(Event.start_dt <= _parse_rfc3339(timeMax))
     total_count = query.count()
     return query, total_count
+
+
+def _event_in_window(
+    *,
+    start_dt: datetime,
+    end_dt: datetime,
+    time_min_dt: datetime | None,
+    time_max_dt: datetime | None,
+) -> bool:
+    start_dt = _as_aware_utc(start_dt)
+    end_dt = _as_aware_utc(end_dt)
+    if time_min_dt and end_dt < time_min_dt:
+        return False
+    if time_max_dt and start_dt >= time_max_dt:
+        return False
+    return True
+
+
+def _sort_event_items(items: list[EventResource], order_by: str | None) -> list[EventResource]:
+    if order_by == "updated":
+        return sorted(items, key=lambda item: (item.updated, item.id))
+
+    return sorted(
+        items,
+        key=lambda item: (
+            item.start.dateTime or f"{item.start.date}T00:00:00Z",
+            item.id,
+        ),
+    )
+
+
+def _expand_single_events(
+    *,
+    events: list[Event],
+    calendar: Calendar,
+    time_min_dt: datetime | None,
+    time_max_dt: datetime | None,
+    emit_hint: int,
+) -> list[EventResource]:
+    expanded: list[EventResource] = []
+
+    for event in events:
+        recurrence = _deserialize_recurrence(event.recurrence_json)
+        rule = _parse_rrule(recurrence)
+        if not rule:
+            if _event_in_window(
+                start_dt=event.start_dt,
+                end_dt=event.end_dt,
+                time_min_dt=time_min_dt,
+                time_max_dt=time_max_dt,
+            ):
+                expanded.append(_to_event_resource(event))
+            continue
+
+        duration = _as_aware_utc(event.end_dt) - _as_aware_utc(event.start_dt)
+        max_emits = max(emit_hint * 10, 1000)
+        for instance_start in _iter_recurrence_starts(
+            start_dt=event.start_dt,
+            rule=rule,
+            max_emits=max_emits,
+        ):
+            instance_start = _as_aware_utc(instance_start)
+            instance_end = _as_aware_utc(instance_start + duration)
+
+            if time_max_dt and instance_start >= time_max_dt:
+                break
+            if not _event_in_window(
+                start_dt=instance_start,
+                end_dt=instance_end,
+                time_min_dt=time_min_dt,
+                time_max_dt=time_max_dt,
+            ):
+                continue
+
+            expanded.append(
+                _to_instance_resource(
+                    event=event,
+                    start_dt=instance_start,
+                    end_dt=instance_end,
+                    time_zone=calendar.timezone,
+                )
+            )
+
+    return expanded
 
 
 @router.get(
@@ -361,6 +487,7 @@ def events_list(
     maxResults: int = Query(250, ge=1, le=2500),
     pageToken: str | None = Query(None),
     syncToken: str | None = Query(None),
+    singleEvents: bool = Query(False),
     q: str | None = Query(None),
     timeMin: str | None = Query(None),
     timeMax: str | None = Query(None),
@@ -371,6 +498,18 @@ def events_list(
 ):
     calendar = _resolve_calendar_for_actor(db, calendarId, _actor_user_id)
 
+    offset = 0
+    if pageToken:
+        try:
+            offset = int(pageToken)
+        except ValueError:
+            raise HTTPException(400, "Invalid pageToken")
+
+    time_min_dt = _parse_rfc3339(timeMin) if timeMin else None
+    time_max_dt = _parse_rfc3339(timeMax) if timeMax else None
+    if time_min_dt and time_max_dt and time_max_dt <= time_min_dt:
+        raise HTTPException(400, "timeMax must be greater than timeMin")
+
     query, total_count = _query_events_base(
         db=db,
         calendar=calendar,
@@ -378,27 +517,35 @@ def events_list(
         timeMin=timeMin,
         timeMax=timeMax,
         showDeleted=showDeleted,
+        include_recurrence_parents=singleEvents,
     )
 
-    if orderBy == "updated":
-        query = query.order_by(Event.updated_at.asc())
+    if singleEvents:
+        source_events = query.order_by(Event.start_dt.asc()).all()
+        all_items = _expand_single_events(
+            events=source_events,
+            calendar=calendar,
+            time_min_dt=time_min_dt,
+            time_max_dt=time_max_dt,
+            emit_hint=offset + maxResults,
+        )
+        ordered_items = _sort_event_items(all_items, orderBy)
+        total_count = len(ordered_items)
+        items = ordered_items[offset : offset + maxResults]
     else:
-        query = query.order_by(Event.start_dt.asc())
-
-    offset = 0
-    if pageToken:
-        try:
-            offset = int(pageToken)
-        except ValueError:
-            raise HTTPException(400, "Invalid pageToken")
-    events = query.offset(offset).limit(maxResults).all()
-    items = [_to_event_resource(e) for e in events]
+        if orderBy == "updated":
+            query = query.order_by(Event.updated_at.asc())
+        else:
+            query = query.order_by(Event.start_dt.asc())
+        events = query.offset(offset).limit(maxResults).all()
+        items = [_to_event_resource(e) for e in events]
 
     list_etag_raw = "|".join(item.etag for item in items)
-    updated = _iso(events[-1].updated_at) if events else _iso(datetime.now(timezone.utc))
+    updated = items[-1].updated if items else _iso(datetime.now(timezone.utc))
     token_seed = f"{calendar.id}:{total_count}:{updated}:{syncToken or ''}"
     incompatible_sync_filters = any(
         [
+            bool(singleEvents),
             bool(q),
             bool(timeMin),
             bool(timeMax),
@@ -450,8 +597,8 @@ def _create_event_from_body(
     actor_user_id: str,
     body: EventWriteRequest,
 ) -> Event:
-    start_dt = _parse_event_datetime(body.start, calendar.timezone)
-    end_dt = _parse_event_datetime(body.end, calendar.timezone)
+    start_dt, start_is_date = _parse_event_datetime(body.start, calendar.timezone)
+    end_dt, end_is_date = _parse_event_datetime(body.end, calendar.timezone)
     if end_dt <= start_dt:
         raise HTTPException(400, "Event end must be after start")
 
@@ -466,6 +613,8 @@ def _create_event_from_body(
         status=body.status or "confirmed",
         start_dt=start_dt,
         end_dt=end_dt,
+        start_is_date=start_is_date,
+        end_is_date=end_is_date,
         attendees_json="[]",
         created_at=now,
         updated_at=now,
@@ -541,8 +690,8 @@ def events_update(
     if not event:
         raise HTTPException(404, "Event not found")
 
-    start_dt = _parse_event_datetime(body.start, calendar.timezone)
-    end_dt = _parse_event_datetime(body.end, calendar.timezone)
+    start_dt, start_is_date = _parse_event_datetime(body.start, calendar.timezone)
+    end_dt, end_is_date = _parse_event_datetime(body.end, calendar.timezone)
     if end_dt <= start_dt:
         raise HTTPException(400, "Event end must be after start")
 
@@ -552,6 +701,8 @@ def events_update(
     event.status = body.status or "confirmed"
     event.start_dt = start_dt
     event.end_dt = end_dt
+    event.start_is_date = start_is_date
+    event.end_is_date = end_is_date
     if body.iCalUID:
         event.i_cal_uid = body.iCalUID
     event.recurrence_json = json.dumps(body.recurrence or [])
@@ -594,9 +745,13 @@ def events_patch(
     if body.status is not None:
         event.status = body.status
     if body.start is not None:
-        event.start_dt = _parse_event_datetime(body.start, calendar.timezone)
+        start_dt, start_is_date = _parse_event_datetime(body.start, calendar.timezone)
+        event.start_dt = start_dt
+        event.start_is_date = start_is_date
     if body.end is not None:
-        event.end_dt = _parse_event_datetime(body.end, calendar.timezone)
+        end_dt, end_is_date = _parse_event_datetime(body.end, calendar.timezone)
+        event.end_dt = end_dt
+        event.end_is_date = end_is_date
     if body.recurrence is not None:
         event.recurrence_json = json.dumps(body.recurrence)
     if event.end_dt <= event.start_dt:

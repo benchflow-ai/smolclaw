@@ -12,6 +12,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 from claw_gcal.models import Calendar, Event, User
 from claw_gcal.state.action_log import action_log
+from claw_gcal.state.channels import channel_registry
 from claw_gcal.state.snapshots import (
     get_diff,
     get_state_dump,
@@ -158,6 +159,7 @@ def admin_reset():
     """Reset to initial seed state."""
     success = restore_snapshot("initial")
     action_log.clear()
+    channel_registry.clear()
     if success:
         return {"status": "ok", "message": "Reset to initial state"}
     return {

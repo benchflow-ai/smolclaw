@@ -340,6 +340,60 @@ class TestEvents:
         assert resp.status_code == 200
         assert "nextSyncToken" not in resp.json()
 
+    def test_list_single_events_expands_recurrence(self, gcal_client):
+        c = gcal_client.post("/calendar/v3/calendars", json={"summary": "Single Events"})
+        assert c.status_code == 200
+        cal_id = c.json()["id"]
+
+        now = datetime.now(timezone.utc).replace(microsecond=0)
+        start = _rfc3339(now + timedelta(days=1))
+        end = _rfc3339(now + timedelta(days=1, hours=1))
+
+        ins = gcal_client.post(
+            f"/calendar/v3/calendars/{cal_id}/events",
+            json={
+                "summary": "Recurring List Event",
+                "start": {"dateTime": start},
+                "end": {"dateTime": end},
+                "recurrence": ["RRULE:FREQ=DAILY;COUNT=3"],
+            },
+        )
+        assert ins.status_code == 200
+        event_id = ins.json()["id"]
+
+        listed = gcal_client.get(
+            f"/calendar/v3/calendars/{cal_id}/events",
+            params={"singleEvents": True, "orderBy": "startTime"},
+        )
+        assert listed.status_code == 200
+        data = listed.json()
+        assert len(data["items"]) == 3
+        assert "nextSyncToken" not in data
+        assert all(item["recurringEventId"] == event_id for item in data["items"])
+        assert all("recurrence" not in item for item in data["items"])
+
+    def test_all_day_events_use_date_fields(self, gcal_client):
+        create = gcal_client.post(
+            "/calendar/v3/calendars/primary/events",
+            json={
+                "summary": "All Day Event",
+                "start": {"date": "2026-03-20"},
+                "end": {"date": "2026-03-21"},
+            },
+        )
+        assert create.status_code == 200
+        created = create.json()
+        event_id = created["id"]
+
+        assert created["start"] == {"date": "2026-03-20"}
+        assert created["end"] == {"date": "2026-03-21"}
+
+        fetched = gcal_client.get(f"/calendar/v3/calendars/primary/events/{event_id}")
+        assert fetched.status_code == 200
+        got = fetched.json()
+        assert got["start"] == {"date": "2026-03-20"}
+        assert got["end"] == {"date": "2026-03-21"}
+
     def test_instances_expands_recurrence_and_supports_pagination(self, gcal_client):
         c = gcal_client.post("/calendar/v3/calendars", json={"summary": "Recurring"})
         assert c.status_code == 200
@@ -547,3 +601,21 @@ class TestHealthProfileAdmin:
         reset = gcal_client.post("/_admin/reset")
         assert reset.status_code == 200
         assert reset.json()["status"] == "ok"
+
+    def test_admin_reset_clears_channel_registry(self, gcal_client):
+        watch = gcal_client.post(
+            "/calendar/v3/calendars/primary/events/watch",
+            json={"id": "reset-watch", "type": "web_hook", "address": "https://example.com/hook"},
+        )
+        assert watch.status_code == 200
+        channel = watch.json()
+
+        reset = gcal_client.post("/_admin/reset")
+        assert reset.status_code == 200
+        assert reset.json()["status"] == "ok"
+
+        stop = gcal_client.post(
+            "/calendar/v3/channels/stop",
+            json={"id": channel["id"], "resourceId": channel["resourceId"]},
+        )
+        assert stop.status_code == 404
