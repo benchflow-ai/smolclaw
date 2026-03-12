@@ -20,8 +20,7 @@ sys.path.insert(0, str(_PKG))
 from claw_gcal.models.base import resolve_db_path
 from claw_gcal.seed.content import (
     CALENDAR_TEMPLATES,
-    DEFAULT_TARGET_EVENTS,
-    LONG_CONTEXT_TARGET_EVENTS,
+    SCENARIO_DEFINITIONS,
     RECURRING_NEEDLES,
 )
 
@@ -69,6 +68,7 @@ def _load_summary(db_path: str) -> dict[str, int | str]:
 
 def validate(db_path: str, scenario: str) -> bool:
     summary = _load_summary(db_path)
+    scenario_config = SCENARIO_DEFINITIONS[scenario]
 
     print(f"Scenario: {scenario}")
     print(f"User email: {summary['email']}")
@@ -82,21 +82,25 @@ def validate(db_path: str, scenario: str) -> bool:
     print(f"Calendar coverage: {summary['calendar_coverage']}")
 
     errors: list[str] = []
-    expected_events = (
-        DEFAULT_TARGET_EVENTS if scenario == "default" else LONG_CONTEXT_TARGET_EVENTS
+    expected_events = int(scenario_config["target_events"])
+    needle_events = scenario_config["needle_events"] if scenario_config["include_needles"] else []
+    recurring_needles = (
+        scenario_config["recurring_needles"] if scenario_config["include_needles"] else []
     )
+    expected_cancelled = sum(1 for event in needle_events if event.get("status") == "cancelled")
+    expected_all_day = sum(1 for event in needle_events if event.get("all_day"))
     if summary["users"] != 1:
         errors.append(f"users={summary['users']} != 1")
     if summary["calendars"] != len(CALENDAR_TEMPLATES):
         errors.append(f"calendars={summary['calendars']} != {len(CALENDAR_TEMPLATES)}")
     if summary["events"] != expected_events:
         errors.append(f"events={summary['events']} != {expected_events}")
-    if summary["recurring"] < len(RECURRING_NEEDLES):
+    if summary["recurring"] < len(recurring_needles):
         errors.append(
-            f"recurring={summary['recurring']} < {len(RECURRING_NEEDLES)} recurring needles"
+            f"recurring={summary['recurring']} < {len(recurring_needles)} recurring needles"
         )
-    if summary["all_day"] < 1:
-        errors.append("all_day=0")
+    if summary["all_day"] < expected_all_day:
+        errors.append(f"all_day={summary['all_day']} < {expected_all_day}")
     if summary["non_primary"] < 1:
         errors.append("non_primary=0")
     if summary["calendar_coverage"] != len(CALENDAR_TEMPLATES):
@@ -106,8 +110,8 @@ def validate(db_path: str, scenario: str) -> bool:
     if summary["email"] != "alex@nexusai.com":
         errors.append(f"email={summary['email']} != alex@nexusai.com")
 
-    if scenario == "default" and summary["cancelled"] < 1:
-        errors.append("cancelled=0 for default scenario")
+    if expected_cancelled and summary["cancelled"] < expected_cancelled:
+        errors.append(f"cancelled={summary['cancelled']} < {expected_cancelled}")
 
     if errors:
         print(f"\nFAILED ({len(errors)} errors):")
@@ -125,7 +129,7 @@ def main():
     parser.add_argument(
         "--scenario",
         default="long_context",
-        choices=["default", "long_context"],
+        choices=sorted(SCENARIO_DEFINITIONS.keys()),
         help="Scenario to seed or validate",
     )
     args = parser.parse_args()

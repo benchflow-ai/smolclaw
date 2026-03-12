@@ -50,7 +50,7 @@ Interactive API docs:
 
 **38 Google Calendar API endpoints** — calendarList, calendars, events, ACL, settings, colors, freeBusy, watch/channels, profile.
 
-**Seedable scenarios** — `default`, `long_context`, and per-task scenarios for both environments.
+**Seedable scenarios** — `default`, `launch_crunch`, `travel_heavy`, `long_context`, and per-task scenarios for both environments.
 
 **State management** — snapshot, diff, and restore. Every API call is logged for evaluation.
 
@@ -68,7 +68,11 @@ smolclaw reset                      # restore to initial state
 | Gmail | `default` | ~57 emails | Standard inbox with realistic threads/labels |
 | Gmail | `long_context` | ~3000 emails | Stress test with high-volume realistic email |
 | Calendar | `default` | ~72 events | Mixed work/personal/travel calendars with recurring + cancelled events |
+| Calendar | `launch_crunch` | ~96 events | Launch-heavy calendar with war rooms, leadership syncs, and operational load |
+| Calendar | `travel_heavy` | ~88 events | Conference and customer travel with dense logistics and follow-up work |
 | Calendar | `long_context` | ~1400 events | Stress test with dense event history and recurrence |
+
+The Calendar seed content is organized as a reusable content library with named personas, shared calendar templates, fixed needles, reusable event pools, and scenario presets so agents see more realistic scheduling patterns without sacrificing determinism.
 
 ## Configuration
 

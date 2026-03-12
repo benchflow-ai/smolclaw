@@ -20,6 +20,7 @@ from claw_gcal.seed.content import (
     CALENDAR_TEMPLATES,
     DEFAULT_DISTRIBUTION,
     DEFAULT_TARGET_EVENTS,
+    SCENARIO_DEFINITIONS,
     LONG_CONTEXT_DISTRIBUTION,
     LONG_CONTEXT_TARGET_EVENTS,
 )
@@ -143,6 +144,46 @@ def seed_default_scenario(db: Session, user: User, calendars_by_key: dict[str, C
     )
 
 
+def seed_launch_crunch_scenario(
+    db: Session,
+    user: User,
+    calendars_by_key: dict[str, Calendar],
+    rng,
+) -> int:
+    config = SCENARIO_DEFINITIONS["launch_crunch"]
+    return seed_distribution_scenario(
+        db,
+        user,
+        calendars_by_key,
+        rng,
+        target_events=config["target_events"],
+        distribution=config["distribution"],
+        needle_events=config["needle_events"],
+        recurring_needles=config["recurring_needles"],
+        include_needles=config["include_needles"],
+    )
+
+
+def seed_travel_heavy_scenario(
+    db: Session,
+    user: User,
+    calendars_by_key: dict[str, Calendar],
+    rng,
+) -> int:
+    config = SCENARIO_DEFINITIONS["travel_heavy"]
+    return seed_distribution_scenario(
+        db,
+        user,
+        calendars_by_key,
+        rng,
+        target_events=config["target_events"],
+        distribution=config["distribution"],
+        needle_events=config["needle_events"],
+        recurring_needles=config["recurring_needles"],
+        include_needles=config["include_needles"],
+    )
+
+
 def seed_long_context_scenario(
     db: Session,
     user: User,
@@ -161,6 +202,8 @@ def seed_long_context_scenario(
 
 SCENARIOS = {
     "default": seed_default_scenario,
+    "launch_crunch": seed_launch_crunch_scenario,
+    "travel_heavy": seed_travel_heavy_scenario,
     "long_context": seed_long_context_scenario,
 }
 
