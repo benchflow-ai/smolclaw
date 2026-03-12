@@ -47,13 +47,20 @@ _HTTP_STATUS_MAP = {
 async def gcal_error_handler(request: Request, exc: HTTPException):
     """Return errors in Google API style."""
     status, reason = _HTTP_STATUS_MAP.get(exc.status_code, ("UNKNOWN", "unknown"))
-    message = exc.detail if isinstance(exc.detail, str) else str(exc.detail)
+    custom_reason = None
+    if isinstance(exc.detail, dict):
+        message = exc.detail.get("message") or str(exc.detail)
+        custom_reason = exc.detail.get("reason")
+    else:
+        message = exc.detail if isinstance(exc.detail, str) else str(exc.detail)
+    reason = custom_reason or reason
     return JSONResponse(
         status_code=exc.status_code,
         content={
             "error": {
                 "code": exc.status_code,
                 "message": message,
+                "reason": reason,
                 "status": status,
                 "errors": [
                     {

@@ -760,9 +760,9 @@ def events_import(
     _actor_user_id: str = Depends(resolve_actor_user_id),
 ):
     calendar = _resolve_calendar_for_actor(db, calendarId, _actor_user_id)
-    event = _create_event_from_body(calendar=calendar, actor_user_id=_actor_user_id, body=body)
     if not body.iCalUID:
-        event.i_cal_uid = f"{uuid.uuid4().hex}@import.calendar.google.com"
+        raise HTTPException(400, {"message": "Missing iCalUID.", "reason": "required"})
+    event = _create_event_from_body(calendar=calendar, actor_user_id=_actor_user_id, body=body)
     event.etag = _compute_event_etag(event)
     db.add(event)
     db.commit()
@@ -854,7 +854,7 @@ def events_patch(
         event.end_is_date = end_is_date
     if body.recurrence is not None:
         event.recurrence_json = json.dumps(body.recurrence)
-    if event.end_dt <= event.start_dt:
+    if _as_aware_utc(event.end_dt) <= _as_aware_utc(event.start_dt):
         raise HTTPException(400, "Event end must be after start")
 
     event.sequence += 1

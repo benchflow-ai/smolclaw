@@ -97,8 +97,17 @@ class TestCalendarList:
         assert put.status_code == 200
         assert put.json()["selected"] is True
 
-    def test_patch_update_include_description_key_for_secondary(self, gcal_client):
-        c = gcal_client.post("/calendar/v3/calendars", json={"summary": "NoDesc"})
+    def test_insert_requires_id(self, gcal_client):
+        resp = gcal_client.post("/calendar/v3/users/me/calendarList", json={})
+        assert resp.status_code == 400
+        assert resp.json()["error"]["message"] == "Missing required field: id"
+        assert resp.json()["error"]["reason"] == "badRequest"
+
+    def test_patch_update_preserve_description_key_for_secondary(self, gcal_client):
+        c = gcal_client.post(
+            "/calendar/v3/calendars",
+            json={"summary": "HasDesc", "description": "Secondary description"},
+        )
         assert c.status_code == 200
         cal_id = c.json()["id"]
 
@@ -107,20 +116,29 @@ class TestCalendarList:
             json={"selected": False},
         )
         assert patch.status_code == 200
-        assert "description" in patch.json()
+        assert patch.json()["description"] == "Secondary description"
 
         put = gcal_client.put(
             f"/calendar/v3/users/me/calendarList/{cal_id}",
             json={"selected": True},
         )
         assert put.status_code == 200
-        assert "description" in put.json()
+        assert put.json()["description"] == "Secondary description"
 
     def test_delete_owned_calendar_list_entry_forbidden(self, gcal_client):
         c = gcal_client.post("/calendar/v3/calendars", json={"summary": "OwnedCL"})
         cal_id = c.json()["id"]
         resp = gcal_client.delete(f"/calendar/v3/users/me/calendarList/{cal_id}")
         assert resp.status_code == 403
+
+    def test_list_invalid_page_token_returns_google_error(self, gcal_client):
+        resp = gcal_client.get(
+            "/calendar/v3/users/me/calendarList",
+            params={"pageToken": "not-an-offset"},
+        )
+        assert resp.status_code == 400
+        assert resp.json()["error"]["message"] == "Invalid pageToken"
+        assert resp.json()["error"]["reason"] == "badRequest"
 
     def test_watch(self, gcal_client):
         resp = gcal_client.post(
@@ -164,8 +182,11 @@ class TestCalendars:
         delete = gcal_client.delete(f"/calendar/v3/calendars/{cal_id}")
         assert delete.status_code == 204
 
-    def test_patch_includes_description_key_for_secondary(self, gcal_client):
-        create = gcal_client.post("/calendar/v3/calendars", json={"summary": "Cal Desc"})
+    def test_patch_preserves_description_key_for_secondary(self, gcal_client):
+        create = gcal_client.post(
+            "/calendar/v3/calendars",
+            json={"summary": "Cal Desc", "description": "Calendar description"},
+        )
         assert create.status_code == 200
         cal_id = create.json()["id"]
 
@@ -174,7 +195,24 @@ class TestCalendars:
             json={"summary": "Cal Desc Patched"},
         )
         assert patch.status_code == 200
-        assert "description" in patch.json()
+        assert patch.json()["description"] == "Calendar description"
+
+    def test_insert_requires_summary(self, gcal_client):
+        resp = gcal_client.post("/calendar/v3/calendars", json={"summary": "   "})
+        assert resp.status_code == 400
+        assert resp.json()["error"]["message"] == "Missing required field: summary"
+
+    def test_update_requires_summary(self, gcal_client):
+        create = gcal_client.post("/calendar/v3/calendars", json={"summary": "Needs Update"})
+        assert create.status_code == 200
+        cal_id = create.json()["id"]
+
+        resp = gcal_client.put(
+            f"/calendar/v3/calendars/{cal_id}",
+            json={"summary": "   ", "description": "", "location": "", "timeZone": "UTC"},
+        )
+        assert resp.status_code == 400
+        assert resp.json()["error"]["message"] == "Missing required field: summary"
 
     def test_clear_primary(self, gcal_client):
         resp = gcal_client.post("/calendar/v3/calendars/primary/clear")
@@ -186,6 +224,11 @@ class TestCalendars:
         resp = gcal_client.post(f"/calendar/v3/calendars/{cal_id}/clear")
         assert resp.status_code == 400
         assert resp.json()["error"]["message"] == "Invalid Value"
+
+    def test_delete_primary_rejected(self, gcal_client):
+        resp = gcal_client.delete("/calendar/v3/calendars/primary")
+        assert resp.status_code == 400
+        assert resp.json()["error"]["message"] == "Primary calendar cannot be deleted"
 
 
 class TestAcl:
@@ -236,6 +279,45 @@ class TestAcl:
             json={"role": "writer"},
         )
         assert p.status_code == 400
+
+    def test_acl_insert_duplicate_conflict(self, gcal_client):
+        c = gcal_client.post("/calendar/v3/calendars", json={"summary": "ACL Duplicate"})
+        cal_id = c.json()["id"]
+
+        first = gcal_client.post(
+            f"/calendar/v3/calendars/{cal_id}/acl",
+            json={"scope": {"type": "default"}, "role": "reader"},
+        )
+        assert first.status_code == 200
+
+        duplicate = gcal_client.post(
+            f"/calendar/v3/calendars/{cal_id}/acl",
+            json={"scope": {"type": "default"}, "role": "reader"},
+        )
+        assert duplicate.status_code == 409
+        assert duplicate.json()["error"]["reason"] == "conflict"
+
+    def test_acl_update_scope_conflict(self, gcal_client):
+        c = gcal_client.post("/calendar/v3/calendars", json={"summary": "ACL Conflict"})
+        cal_id = c.json()["id"]
+
+        first = gcal_client.post(
+            f"/calendar/v3/calendars/{cal_id}/acl",
+            json={"scope": {"type": "user", "value": "one@example.com"}, "role": "reader"},
+        )
+        second = gcal_client.post(
+            f"/calendar/v3/calendars/{cal_id}/acl",
+            json={"scope": {"type": "user", "value": "two@example.com"}, "role": "reader"},
+        )
+        assert first.status_code == 200
+        assert second.status_code == 200
+
+        conflict = gcal_client.put(
+            f"/calendar/v3/calendars/{cal_id}/acl/{first.json()['id']}",
+            json={"scope": {"type": "user", "value": "two@example.com"}, "role": "reader"},
+        )
+        assert conflict.status_code == 409
+        assert conflict.json()["error"]["reason"] == "conflict"
 
     def test_acl_watch(self, gcal_client):
         r = gcal_client.post(
@@ -306,6 +388,26 @@ class TestEvents:
         delete = gcal_client.delete(f"/calendar/v3/calendars/primary/events/{event_id}")
         assert delete.status_code == 204
 
+    def test_import_requires_icaluid(self, gcal_client):
+        c = gcal_client.post("/calendar/v3/calendars", json={"summary": "Import Needs UID"})
+        cal_id = c.json()["id"]
+        now = datetime.now(timezone.utc).replace(microsecond=0)
+        start = _rfc3339(now + timedelta(days=1))
+        end = _rfc3339(now + timedelta(days=1, hours=1))
+
+        resp = gcal_client.post(
+            f"/calendar/v3/calendars/{cal_id}/events/import",
+            json={
+                "summary": "Imp Missing UID",
+                "start": {"dateTime": start},
+                "end": {"dateTime": end},
+            },
+        )
+        assert resp.status_code == 400
+        error = resp.json()["error"]
+        assert error["message"] == "Missing iCalUID."
+        assert error["reason"] == "required"
+
     def test_watch(self, gcal_client):
         r = gcal_client.post(
             "/calendar/v3/calendars/primary/events/watch",
@@ -371,6 +473,150 @@ class TestEvents:
         assert "nextSyncToken" not in data
         assert all(item["recurringEventId"] == event_id for item in data["items"])
         assert all("recurrence" not in item for item in data["items"])
+
+    def test_list_invalid_page_token_returns_google_error(self, gcal_client):
+        resp = gcal_client.get(
+            "/calendar/v3/calendars/primary/events",
+            params={"pageToken": "bad-token"},
+        )
+        assert resp.status_code == 400
+        assert resp.json()["error"]["message"] == "Invalid pageToken"
+        assert resp.json()["error"]["reason"] == "badRequest"
+
+    def test_list_invalid_time_window_returns_google_error(self, gcal_client):
+        now = datetime.now(timezone.utc).replace(microsecond=0)
+        resp = gcal_client.get(
+            "/calendar/v3/calendars/primary/events",
+            params={
+                "timeMin": _rfc3339(now + timedelta(days=2)),
+                "timeMax": _rfc3339(now + timedelta(days=1)),
+            },
+        )
+        assert resp.status_code == 400
+        assert resp.json()["error"]["message"] == "timeMax must be greater than timeMin"
+
+    def test_insert_rejects_end_before_start(self, gcal_client):
+        now = datetime.now(timezone.utc).replace(microsecond=0)
+        start = _rfc3339(now + timedelta(days=1))
+        end = _rfc3339(now + timedelta(days=1) - timedelta(minutes=30))
+        resp = gcal_client.post(
+            "/calendar/v3/calendars/primary/events",
+            json={"summary": "Backwards", "start": {"dateTime": start}, "end": {"dateTime": end}},
+        )
+        assert resp.status_code == 400
+        assert resp.json()["error"]["message"] == "Event end must be after start"
+
+    def test_patch_rejects_end_before_start_without_mutating(self, gcal_client):
+        now = datetime.now(timezone.utc).replace(microsecond=0)
+        start = _rfc3339(now + timedelta(days=1))
+        end = _rfc3339(now + timedelta(days=1, hours=1))
+        created = gcal_client.post(
+            "/calendar/v3/calendars/primary/events",
+            json={"summary": "Patch Guard", "start": {"dateTime": start}, "end": {"dateTime": end}},
+        )
+        assert created.status_code == 200
+        event_id = created.json()["id"]
+
+        patch = gcal_client.patch(
+            f"/calendar/v3/calendars/primary/events/{event_id}",
+            json={"end": {"dateTime": _rfc3339(now + timedelta(hours=1))}},
+        )
+        assert patch.status_code == 400
+        assert patch.json()["error"]["message"] == "Event end must be after start"
+
+        fetched = gcal_client.get(f"/calendar/v3/calendars/primary/events/{event_id}")
+        assert fetched.status_code == 200
+        assert fetched.json()["summary"] == "Patch Guard"
+        assert fetched.json()["end"]["dateTime"] == end
+
+    def test_show_deleted_returns_cancelled_events(self, gcal_client):
+        now = datetime.now(timezone.utc).replace(microsecond=0)
+        start = _rfc3339(now + timedelta(days=1))
+        end = _rfc3339(now + timedelta(days=1, hours=1))
+        created = gcal_client.post(
+            "/calendar/v3/calendars/primary/events",
+            json={"summary": "Cancelled Visible", "start": {"dateTime": start}, "end": {"dateTime": end}},
+        )
+        event_id = created.json()["id"]
+
+        cancelled = gcal_client.patch(
+            f"/calendar/v3/calendars/primary/events/{event_id}",
+            json={"status": "cancelled"},
+        )
+        assert cancelled.status_code == 200
+        assert cancelled.json()["status"] == "cancelled"
+
+        hidden = gcal_client.get("/calendar/v3/calendars/primary/events")
+        hidden_ids = {item["id"] for item in hidden.json()["items"]}
+        assert event_id not in hidden_ids
+
+        shown = gcal_client.get(
+            "/calendar/v3/calendars/primary/events",
+            params={"showDeleted": True},
+        )
+        shown_items = {item["id"]: item for item in shown.json()["items"]}
+        assert shown_items[event_id]["status"] == "cancelled"
+
+        fetched = gcal_client.get(f"/calendar/v3/calendars/primary/events/{event_id}")
+        assert fetched.status_code == 200
+        assert fetched.json()["status"] == "cancelled"
+
+    def test_update_increments_sequence_and_preserves_created(self, gcal_client):
+        now = datetime.now(timezone.utc).replace(microsecond=0)
+        start = _rfc3339(now + timedelta(days=1))
+        end = _rfc3339(now + timedelta(days=1, hours=1))
+        created = gcal_client.post(
+            "/calendar/v3/calendars/primary/events",
+            json={"summary": "Sequence Check", "start": {"dateTime": start}, "end": {"dateTime": end}},
+        )
+        assert created.status_code == 200
+        event = created.json()
+
+        updated = gcal_client.put(
+            f"/calendar/v3/calendars/primary/events/{event['id']}",
+            json={
+                "summary": "Sequence Updated",
+                "description": "desc",
+                "location": "Room 1",
+                "start": {"dateTime": start},
+                "end": {"dateTime": end},
+            },
+        )
+        assert updated.status_code == 200
+        body = updated.json()
+        assert body["sequence"] == event["sequence"] + 1
+        assert body["created"] == event["created"]
+        assert body["updated"] != event["updated"]
+
+    def test_list_single_events_weekly_byday_recurrence(self, gcal_client):
+        c = gcal_client.post("/calendar/v3/calendars", json={"summary": "Weekly BYDAY"})
+        assert c.status_code == 200
+        cal_id = c.json()["id"]
+
+        base = datetime(2026, 3, 16, 9, 0, tzinfo=timezone.utc)
+        ins = gcal_client.post(
+            f"/calendar/v3/calendars/{cal_id}/events",
+            json={
+                "summary": "Weekly Standup",
+                "start": {"dateTime": _rfc3339(base)},
+                "end": {"dateTime": _rfc3339(base + timedelta(minutes=30))},
+                "recurrence": ["RRULE:FREQ=WEEKLY;BYDAY=MO,WE;COUNT=4"],
+            },
+        )
+        assert ins.status_code == 200
+
+        listed = gcal_client.get(
+            f"/calendar/v3/calendars/{cal_id}/events",
+            params={"singleEvents": True, "orderBy": "startTime"},
+        )
+        assert listed.status_code == 200
+        starts = [item["start"]["dateTime"] for item in listed.json()["items"]]
+        assert starts == [
+            "2026-03-16T09:00:00Z",
+            "2026-03-18T09:00:00Z",
+            "2026-03-23T09:00:00Z",
+            "2026-03-25T09:00:00Z",
+        ]
 
     def test_get_recurring_instance_by_instance_id(self, gcal_client):
         c = gcal_client.post("/calendar/v3/calendars", json={"summary": "Instance Lookup"})
@@ -480,6 +726,30 @@ class TestEvents:
         assert single.status_code == 200
         assert len(single.json()["items"]) == 1
 
+    def test_instances_respect_time_zone_override(self, gcal_client):
+        c = gcal_client.post("/calendar/v3/calendars", json={"summary": "Instances TZ"})
+        cal_id = c.json()["id"]
+        base = datetime.now(timezone.utc).replace(microsecond=0) + timedelta(days=1)
+        ins = gcal_client.post(
+            f"/calendar/v3/calendars/{cal_id}/events",
+            json={
+                "summary": "TZ Series",
+                "start": {"dateTime": _rfc3339(base)},
+                "end": {"dateTime": _rfc3339(base + timedelta(hours=1))},
+                "recurrence": ["RRULE:FREQ=DAILY;COUNT=2"],
+            },
+        )
+        event_id = ins.json()["id"]
+
+        resp = gcal_client.get(
+            f"/calendar/v3/calendars/{cal_id}/events/{event_id}/instances",
+            params={"timeZone": "America/Los_Angeles"},
+        )
+        assert resp.status_code == 200
+        item = resp.json()["items"][0]
+        assert item["start"]["timeZone"] == "America/Los_Angeles"
+        assert item["originalStartTime"]["timeZone"] == "America/Los_Angeles"
+
     def test_snapshot_restore_preserves_event_timestamps(self, gcal_client):
         c = gcal_client.post("/calendar/v3/calendars", json={"summary": "Snapshot TS"})
         assert c.status_code == 200
@@ -548,6 +818,32 @@ class TestSettingsColorsFreebusyChannels:
         )
         assert stop.status_code == 204
 
+    def test_settings_get_unknown_returns_google_error(self, gcal_client):
+        resp = gcal_client.get("/calendar/v3/users/me/settings/not-a-setting")
+        assert resp.status_code == 404
+        assert resp.json()["error"]["message"] == "Setting not found"
+        assert resp.json()["error"]["reason"] == "notFound"
+
+    def test_settings_watch_preserves_optional_channel_fields(self, gcal_client):
+        resp = gcal_client.post(
+            "/calendar/v3/users/me/settings/watch",
+            json={
+                "id": "settings-opts",
+                "type": "web_hook",
+                "address": "https://example.com/hook",
+                "token": "verify-token",
+                "payload": True,
+                "params": {"ttl": "600"},
+                "expiration": "9999999999999",
+            },
+        )
+        assert resp.status_code == 200
+        body = resp.json()
+        assert body["token"] == "verify-token"
+        assert body["payload"] is True
+        assert body["params"] == {"ttl": "600"}
+        assert body["expiration"] == "9999999999999"
+
     def test_colors_and_freebusy(self, gcal_client):
         colors = gcal_client.get("/calendar/v3/colors")
         assert colors.status_code == 200
@@ -599,12 +895,74 @@ class TestSettingsColorsFreebusyChannels:
         assert busy[0]["start"] == start
         assert busy[-1]["end"] == _rfc3339(now + timedelta(days=3, hours=1))
 
+    def test_freebusy_invalid_time_window_returns_google_error(self, gcal_client):
+        now = datetime.now(timezone.utc).replace(microsecond=0)
+        resp = gcal_client.post(
+            "/calendar/v3/freeBusy",
+            json={
+                "timeMin": _rfc3339(now + timedelta(days=2)),
+                "timeMax": _rfc3339(now + timedelta(days=1)),
+                "items": [{"id": "primary"}],
+            },
+        )
+        assert resp.status_code == 400
+        assert resp.json()["error"]["message"] == "timeMax must be greater than timeMin"
+
+    def test_freebusy_missing_calendar_reports_not_found(self, gcal_client):
+        now = datetime.now(timezone.utc).replace(microsecond=0)
+        resp = gcal_client.post(
+            "/calendar/v3/freeBusy",
+            json={
+                "timeMin": _rfc3339(now),
+                "timeMax": _rfc3339(now + timedelta(days=1)),
+                "items": [{"id": "missing-calendar"}],
+            },
+        )
+        assert resp.status_code == 200
+        body = resp.json()
+        assert body["calendars"]["missing-calendar"]["busy"] == []
+        assert body["calendars"]["missing-calendar"]["errors"][0]["reason"] == "notFound"
+
+    def test_freebusy_ignores_cancelled_events(self, gcal_client):
+        now = datetime.now(timezone.utc).replace(microsecond=0)
+        start = _rfc3339(now + timedelta(days=1))
+        end = _rfc3339(now + timedelta(days=1, hours=1))
+        created = gcal_client.post(
+            "/calendar/v3/calendars/primary/events",
+            json={"summary": "Cancelled Busy", "start": {"dateTime": start}, "end": {"dateTime": end}},
+        )
+        event_id = created.json()["id"]
+
+        cancelled = gcal_client.patch(
+            f"/calendar/v3/calendars/primary/events/{event_id}",
+            json={"status": "cancelled"},
+        )
+        assert cancelled.status_code == 200
+
+        resp = gcal_client.post(
+            "/calendar/v3/freeBusy",
+            json={
+                "timeMin": _rfc3339(now),
+                "timeMax": _rfc3339(now + timedelta(days=2)),
+                "items": [{"id": "primary"}],
+            },
+        )
+        assert resp.status_code == 200
+        busy = resp.json()["calendars"]["primary"]["busy"]
+        assert all(slot["start"] != start for slot in busy)
+
     def test_channels_stop_unknown(self, gcal_client):
         resp = gcal_client.post(
             "/calendar/v3/channels/stop",
             json={"id": "does-not-exist", "resourceId": "unknown"},
         )
         assert resp.status_code == 404
+
+    def test_channels_stop_missing_fields_returns_google_error(self, gcal_client):
+        resp = gcal_client.post("/calendar/v3/channels/stop", json={"id": "missing-resource"})
+        assert resp.status_code == 400
+        assert resp.json()["error"]["message"] == "Missing required field: id/resourceId"
+        assert resp.json()["error"]["reason"] == "badRequest"
 
 
 class TestHealthProfileAdmin:

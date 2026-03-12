@@ -77,6 +77,25 @@ class TestCalendarReadsConformance:
         _assert_top_level_keys_equal(real, mock)
         _assert_shape(real, mock)
 
+    def test_calendarlist_get_secondary_shape(self, gcal_client):
+        created = gcal_client.post(
+            "/calendar/v3/calendars",
+            json={"summary": "Updated 172946", "description": "Updated desc", "timeZone": "UTC"},
+        )
+        assert created.status_code == 200
+        cal_id = created.json()["id"]
+
+        patched = gcal_client.patch(
+            f"/calendar/v3/users/me/calendarList/{cal_id}",
+            json={"selected": True, "colorId": "3"},
+        )
+        assert patched.status_code == 200
+
+        real = load_fixture("calendarlist_get_secondary.json")
+        mock = gcal_client.get(f"/calendar/v3/users/me/calendarList/{cal_id}").json()
+        _assert_top_level_keys_equal(real, mock)
+        _assert_shape(real, mock)
+
     def test_calendars_get_primary_shape(self, gcal_client):
         real = load_fixture("calendars_get_primary.json")
         mock = gcal_client.get("/calendar/v3/calendars/primary").json()
@@ -89,11 +108,59 @@ class TestCalendarReadsConformance:
         mock = gcal_client.get("/calendar/v3/calendars/primary/events?maxResults=5").json()
         _assert_shape(real, mock)
 
+    def test_events_list_secondary_shape(self, gcal_client):
+        cal = gcal_client.post(
+            "/calendar/v3/calendars",
+            json={"summary": "Updated 172946", "description": "Updated desc", "timeZone": "UTC"},
+        ).json()
+        start = datetime.now(timezone.utc).replace(microsecond=0) + timedelta(days=1)
+        end = start + timedelta(hours=1)
+        inserted = gcal_client.post(
+            f"/calendar/v3/calendars/{cal['id']}/events",
+            json={
+                "summary": "Fixture Event 172946",
+                "description": "Fixture body",
+                "location": "Virtual",
+                "start": {"dateTime": _rfc3339(start), "timeZone": "UTC"},
+                "end": {"dateTime": _rfc3339(end), "timeZone": "UTC"},
+            },
+        )
+        assert inserted.status_code == 200
+
+        real = load_fixture("events_list_secondary.json")
+        mock = gcal_client.get(f"/calendar/v3/calendars/{cal['id']}/events").json()
+        _assert_top_level_keys_equal(real, mock)
+        _assert_shape(real, mock)
+
     def test_events_get_shape(self, gcal_client):
         real = load_fixture("events_get_primary.json")
         lst = gcal_client.get("/calendar/v3/calendars/primary/events?maxResults=1").json()
         event_id = lst["items"][0]["id"]
         mock = gcal_client.get(f"/calendar/v3/calendars/primary/events/{event_id}").json()
+        _assert_shape(real, mock)
+
+    def test_events_get_secondary_shape(self, gcal_client):
+        cal = gcal_client.post(
+            "/calendar/v3/calendars",
+            json={"summary": "Updated 172946", "description": "Updated desc", "timeZone": "UTC"},
+        ).json()
+        start = datetime.now(timezone.utc).replace(microsecond=0) + timedelta(days=1)
+        end = start + timedelta(hours=1)
+        inserted = gcal_client.post(
+            f"/calendar/v3/calendars/{cal['id']}/events",
+            json={
+                "summary": "Fixture Event 172946",
+                "description": "Fixture body",
+                "location": "Virtual",
+                "start": {"dateTime": _rfc3339(start), "timeZone": "UTC"},
+                "end": {"dateTime": _rfc3339(end), "timeZone": "UTC"},
+            },
+        )
+        event_id = inserted.json()["id"]
+
+        real = load_fixture("events_get_response.json")
+        mock = gcal_client.get(f"/calendar/v3/calendars/{cal['id']}/events/{event_id}").json()
+        _assert_top_level_keys_equal(real, mock)
         _assert_shape(real, mock)
 
 
@@ -218,6 +285,29 @@ class TestWriteConformance:
         _assert_top_level_keys_equal(real_update, update.json())
         _assert_shape(real_update, update.json())
 
+    def test_events_import_missing_icaluid_error_shape(self, gcal_client):
+        real = load_fixture("events_import_response.json")
+        cal = gcal_client.post(
+            "/calendar/v3/calendars",
+            json={"summary": "Import conf", "description": "z", "timeZone": "UTC"},
+        ).json()
+        start = datetime.now(timezone.utc).replace(microsecond=0) + timedelta(days=1)
+        end = start + timedelta(hours=1)
+
+        resp = gcal_client.post(
+            f"/calendar/v3/calendars/{cal['id']}/events/import",
+            json={
+                "summary": "Import without UID",
+                "start": {"dateTime": _rfc3339(start), "timeZone": "UTC"},
+                "end": {"dateTime": _rfc3339(end), "timeZone": "UTC"},
+            },
+        )
+        assert resp.status_code == 400
+        mock = resp.json()
+        assert set(real["error"].keys()).issubset(set(mock["error"].keys()))
+        assert mock["error"]["message"] == real["error"]["message"]
+        assert mock["error"]["reason"] == real["error"]["reason"]
+
     def test_acl_insert_patch_update_get_shapes(self, gcal_client):
         real_insert = load_fixture("acl_insert_response.json")
         real_get = load_fixture("acl_get_response.json")
@@ -260,5 +350,30 @@ class TestWriteConformance:
             "/calendar/v3/calendars/primary/events/watch",
             json={"id": "conformance-watch", "type": "web_hook", "address": "https://example.com/hook"},
         ).json()
+        _assert_top_level_keys_equal(real, mock)
+        _assert_shape(real, mock)
+
+    def test_events_instances_shape(self, gcal_client):
+        real = load_fixture("events_instances_response.json")
+        cal = gcal_client.post(
+            "/calendar/v3/calendars",
+            json={"summary": "Updated 172946", "description": "Updated desc", "timeZone": "UTC"},
+        ).json()
+        start = datetime.now(timezone.utc).replace(microsecond=0) + timedelta(days=1)
+        end = start + timedelta(hours=1)
+        inserted = gcal_client.post(
+            f"/calendar/v3/calendars/{cal['id']}/events",
+            json={
+                "summary": "Fixture Event 172946",
+                "description": "Fixture body",
+                "location": "Virtual",
+                "start": {"dateTime": _rfc3339(start), "timeZone": "UTC"},
+                "end": {"dateTime": _rfc3339(end), "timeZone": "UTC"},
+                "recurrence": ["RRULE:FREQ=DAILY;COUNT=1"],
+            },
+        )
+        event_id = inserted.json()["id"]
+
+        mock = gcal_client.get(f"/calendar/v3/calendars/{cal['id']}/events/{event_id}/instances").json()
         _assert_top_level_keys_equal(real, mock)
         _assert_shape(real, mock)

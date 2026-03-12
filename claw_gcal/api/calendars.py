@@ -301,12 +301,7 @@ def calendar_list_patch(
     _apply_calendar_list_mutation(calendar, body, is_update=False)
     db.commit()
     db.refresh(calendar)
-    # Real API keeps `description` in patch response for secondary calendars.
-    return _to_calendar_entry(
-        calendar,
-        data_owner=_owner_email(db, _user_id),
-        include_empty_description=True,
-    )
+    return _to_calendar_entry(calendar, data_owner=_owner_email(db, _user_id))
 
 
 @router.put(
@@ -325,12 +320,7 @@ def calendar_list_update(
     _apply_calendar_list_mutation(calendar, body, is_update=True)
     db.commit()
     db.refresh(calendar)
-    # Real API keeps `description` in update response for secondary calendars.
-    return _to_calendar_entry(
-        calendar,
-        data_owner=_owner_email(db, _user_id),
-        include_empty_description=True,
-    )
+    return _to_calendar_entry(calendar, data_owner=_owner_email(db, _user_id))
 
 
 @router.delete("/users/{userId}/calendarList/{calendarId}", status_code=status.HTTP_204_NO_CONTENT)
@@ -457,12 +447,7 @@ def calendars_patch(
         calendar.auto_accept_invitations = body.autoAcceptInvitations
     db.commit()
     db.refresh(calendar)
-    # Real API includes `description` in patch response for secondary calendars.
-    return _to_calendar_resource(
-        calendar,
-        data_owner=_owner_email(db, _user_id),
-        include_empty_description=True,
-    )
+    return _to_calendar_resource(calendar, data_owner=_owner_email(db, _user_id))
 
 
 @router.put("/calendars/{calendarId}", response_model=CalendarResource, response_model_exclude_none=True)
