@@ -1,0 +1,14 @@
+{
+  "conferenceProperties": {
+    "allowedConferenceSolutionTypes": [
+      "hangoutsMeet"
+    ]
+  },
+  "dataOwner": "user@example.com",
+  "description": "Fixture calendar",
+  "etag": "\"Z-6jrfJ3qSJbY86IID-dvkgRGbM\"",
+  "id": "c_44e169aafbce7a91485c2f5c24d8d630aac033caa53b33f35a25d80cc4459c5b@group.calendar.google.com",
+  "kind": "calendar#calendar",
+  "summary": "Parity Fixture 172946",
+  "timeZone": "UTC"
+}

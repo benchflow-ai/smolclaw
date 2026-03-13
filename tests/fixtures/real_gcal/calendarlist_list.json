@@ -1,0 +1,241 @@
+{
+  "etag": "\"p32nt1qvnhacp60o\"",
+  "items": [
+    {
+      "accessRole": "owner",
+      "backgroundColor": "#9fe1e7",
+      "colorId": "14",
+      "conferenceProperties": {
+        "allowedConferenceSolutionTypes": [
+          "hangoutsMeet"
+        ]
+      },
+      "defaultReminders": [
+        {
+          "method": "popup",
+          "minutes": 10
+        }
+      ],
+      "etag": "\"1772132009934380\"",
+      "foregroundColor": "#000000",
+      "id": "user@example.com",
+      "kind": "calendar#calendarListEntry",
+      "notificationSettings": {
+        "notifications": [
+          {
+            "method": "email",
+            "type": "eventCreation"
+          },
+          {
+            "method": "email",
+            "type": "eventChange"
+          },
+          {
+            "method": "email",
+            "type": "eventCancellation"
+          },
+          {
+            "method": "email",
+            "type": "eventResponse"
+          }
+        ]
+      },
+      "primary": true,
+      "selected": true,
+      "summary": "user@example.com",
+      "timeZone": "UTC"
+    },
+    {
+      "accessRole": "owner",
+      "backgroundColor": "#fa573c",
+      "colorId": "4",
+      "conferenceProperties": {
+        "allowedConferenceSolutionTypes": [
+          "hangoutsMeet"
+        ]
+      },
+      "dataOwner": "user@example.com",
+      "defaultReminders": [],
+      "etag": "\"1773097815787455\"",
+      "foregroundColor": "#000000",
+      "id": "c_e44bb3b8cedb6d76408254736248c75b8aa87e0256c65951b3a30ac329c5e4e7@group.calendar.google.com",
+      "kind": "calendar#calendarListEntry",
+      "selected": true,
+      "summary": "Parity cal",
+      "timeZone": "UTC"
+    },
+    {
+      "accessRole": "owner",
+      "backgroundColor": "#fa573c",
+      "colorId": "4",
+      "conferenceProperties": {
+        "allowedConferenceSolutionTypes": [
+          "hangoutsMeet"
+        ]
+      },
+      "dataOwner": "user@example.com",
+      "defaultReminders": [],
+      "etag": "\"1773098096394783\"",
+      "foregroundColor": "#000000",
+      "id": "c_4094149ce734e04d4cb507af908cc95727ec3607985fdd8323859dbe2154ccba@group.calendar.google.com",
+      "kind": "calendar#calendarListEntry",
+      "selected": true,
+      "summary": "Parity cal",
+      "timeZone": "UTC"
+    },
+    {
+      "accessRole": "owner",
+      "backgroundColor": "#9a9cff",
+      "colorId": "17",
+      "conferenceProperties": {
+        "allowedConferenceSolutionTypes": [
+          "hangoutsMeet"
+        ]
+      },
+      "dataOwner": "user@example.com",
+      "defaultReminders": [],
+      "etag": "\"1773098220643791\"",
+      "foregroundColor": "#000000",
+      "id": "c_f15bc9bec658edc6117756b2bb6d0a3dc984627c9ca981f98a60bf53688d4e35@group.calendar.google.com",
+      "kind": "calendar#calendarListEntry",
+      "selected": true,
+      "summary": "Parity cal",
+      "timeZone": "UTC"
+    },
+    {
+      "accessRole": "owner",
+      "backgroundColor": "#b3dc6c",
+      "colorId": "10",
+      "conferenceProperties": {
+        "allowedConferenceSolutionTypes": [
+          "hangoutsMeet"
+        ]
+      },
+      "dataOwner": "user@example.com",
+      "defaultReminders": [],
+      "etag": "\"1773272342106303\"",
+      "foregroundColor": "#000000",
+      "id": "c_174b9b3d005a1575908254e7a722fd878e09ec76ffefea5c53366576f6cac9bd@group.calendar.google.com",
+      "kind": "calendar#calendarListEntry",
+      "selected": true,
+      "summary": "Updated 32089799",
+      "timeZone": "UTC"
+    },
+    {
+      "accessRole": "owner",
+      "backgroundColor": "#7bd148",
+      "colorId": "9",
+      "conferenceProperties": {
+        "allowedConferenceSolutionTypes": [
+          "hangoutsMeet"
+        ]
+      },
+      "dataOwner": "user@example.com",
+      "defaultReminders": [],
+      "etag": "\"1773272348582543\"",
+      "foregroundColor": "#000000",
+      "id": "c_6962ad270ce4d8327d0f1cc0cff5a1b086d1d6cefbafd224b8251ab8871b1bfb@group.calendar.google.com",
+      "kind": "calendar#calendarListEntry",
+      "selected": true,
+      "summary": "Insert 32089799",
+      "timeZone": "UTC"
+    },
+    {
+      "accessRole": "owner",
+      "backgroundColor": "#9a9cff",
+      "colorId": "17",
+      "conferenceProperties": {
+        "allowedConferenceSolutionTypes": [
+          "hangoutsMeet"
+        ]
+      },
+      "dataOwner": "user@example.com",
+      "defaultReminders": [],
+      "etag": "\"1773272578261375\"",
+      "foregroundColor": "#000000",
+      "id": "c_bc8a97790d780eece82dab7a44f74437c597588bb988275390ea4713f2198a6a@group.calendar.google.com",
+      "kind": "calendar#calendarListEntry",
+      "selected": true,
+      "summary": "Inserted 830d1c59",
+      "timeZone": "UTC"
+    },
+    {
+      "accessRole": "owner",
+      "backgroundColor": "#b99aff",
+      "colorId": "18",
+      "conferenceProperties": {
+        "allowedConferenceSolutionTypes": [
+          "hangoutsMeet"
+        ]
+      },
+      "dataOwner": "user@example.com",
+      "defaultReminders": [],
+      "etag": "\"1773272892202719\"",
+      "foregroundColor": "#000000",
+      "id": "c_40f0c67324d4c4435124dd643a5517ba6d4493644f6ff5cad074910b935b5cb6@group.calendar.google.com",
+      "kind": "calendar#calendarListEntry",
+      "selected": true,
+      "summary": "Inserted 43e6693e",
+      "timeZone": "UTC"
+    },
+    {
+      "accessRole": "owner",
+      "backgroundColor": "#ac725e",
+      "colorId": "1",
+      "conferenceProperties": {
+        "allowedConferenceSolutionTypes": [
+          "hangoutsMeet"
+        ]
+      },
+      "dataOwner": "user@example.com",
+      "defaultReminders": [],
+      "etag": "\"1773272999712063\"",
+      "foregroundColor": "#000000",
+      "id": "c_52765ef2f8f7945ebf629f884956cf6566fa2643755efe076ed979b6d19fead9@group.calendar.google.com",
+      "kind": "calendar#calendarListEntry",
+      "selected": true,
+      "summary": "Inserted 62dab17e",
+      "timeZone": "UTC"
+    },
+    {
+      "accessRole": "owner",
+      "backgroundColor": "#a47ae2",
+      "colorId": "24",
+      "conferenceProperties": {
+        "allowedConferenceSolutionTypes": [
+          "hangoutsMeet"
+        ]
+      },
+      "dataOwner": "user@example.com",
+      "defaultReminders": [],
+      "etag": "\"1773273051172399\"",
+      "foregroundColor": "#000000",
+      "id": "c_b2b43058ef7b0b92a5e6d1b1d5b1e857e10c067fc9e54d24324a36ada83f8519@group.calendar.google.com",
+      "kind": "calendar#calendarListEntry",
+      "selected": true,
+      "summary": "Inserted d7109aaf",
+      "timeZone": "UTC"
+    },
+    {
+      "accessRole": "owner",
+      "backgroundColor": "#f83a22",
+      "colorId": "3",
+      "conferenceProperties": {
+        "allowedConferenceSolutionTypes": [
+          "hangoutsMeet"
+        ]
+      },
+      "dataOwner": "user@example.com",
+      "defaultReminders": [],
+      "etag": "\"1773273257391727\"",
+      "foregroundColor": "#000000",
+      "id": "c_480593b10ecca062337fc418cfa7b98d0b63e52f19e1832ff27af33907a6eb57@group.calendar.google.com",
+      "kind": "calendar#calendarListEntry",
+      "selected": true,
+      "summary": "Inserted d11fc527",
+      "timeZone": "UTC"
+    }
+  ],
+  "kind": "calendar#calendarList",
+  "nextSyncToken": "CK_Q6_eKmZMDEhVkb3doaXpAZGVlcC10dXRvci5jb20="
+}

@@ -1,0 +1,34 @@
+{
+  "created": "2026-03-12T00:29:50.000Z",
+  "creator": {
+    "email": "user@example.com"
+  },
+  "description": "Updated",
+  "end": {
+    "dateTime": "2026-03-14T02:29:53Z",
+    "timeZone": "UTC"
+  },
+  "etag": "\"3546550788204510\"",
+  "eventType": "default",
+  "htmlLink": "https://www.google.com/calendar/event?eid=bTJqYW85cGlldDRxbm11ZXY4ajh1aW82NGsgY180NGUxNjlhYWZiY2U3YTkxNDg1YzJmNWMyNGQ4ZDYzMGFhYzAzM2NhYTUzYjMzZjM1YTI1ZDgwY2M0NDU5YzViQGc",
+  "iCalUID": "m2jao9piet4qnmuev8j8uio64k@google.com",
+  "id": "m2jao9piet4qnmuev8j8uio64k",
+  "kind": "calendar#event",
+  "location": "Room B",
+  "organizer": {
+    "displayName": "Updated 172946",
+    "email": "c_44e169aafbce7a91485c2f5c24d8d630aac033caa53b33f35a25d80cc4459c5b@group.calendar.google.com",
+    "self": true
+  },
+  "reminders": {
+    "useDefault": true
+  },
+  "sequence": 1,
+  "start": {
+    "dateTime": "2026-03-14T00:29:53Z",
+    "timeZone": "UTC"
+  },
+  "status": "confirmed",
+  "summary": "Update Event 172946",
+  "updated": "2026-03-12T00:29:54.102Z"
+}

@@ -1,0 +1,47 @@
+{
+  "accessRole": "owner",
+  "defaultReminders": [],
+  "description": "Updated desc",
+  "etag": "\"p32vo976ehmcp60o\"",
+  "items": [
+    {
+      "created": "2026-03-12T00:29:50.000Z",
+      "creator": {
+        "email": "user@example.com"
+      },
+      "description": "Fixture body",
+      "end": {
+        "dateTime": "2026-03-13T01:29:50Z",
+        "timeZone": "UTC"
+      },
+      "etag": "\"3546550782264446\"",
+      "eventType": "default",
+      "htmlLink": "https://www.google.com/calendar/event?eid=bTJqYW85cGlldDRxbm11ZXY4ajh1aW82NGsgY180NGUxNjlhYWZiY2U3YTkxNDg1YzJmNWMyNGQ4ZDYzMGFhYzAzM2NhYTUzYjMzZjM1YTI1ZDgwY2M0NDU5YzViQGc",
+      "iCalUID": "m2jao9piet4qnmuev8j8uio64k@google.com",
+      "id": "m2jao9piet4qnmuev8j8uio64k",
+      "kind": "calendar#event",
+      "location": "Virtual",
+      "organizer": {
+        "displayName": "Updated 172946",
+        "email": "c_44e169aafbce7a91485c2f5c24d8d630aac033caa53b33f35a25d80cc4459c5b@group.calendar.google.com",
+        "self": true
+      },
+      "reminders": {
+        "useDefault": true
+      },
+      "sequence": 0,
+      "start": {
+        "dateTime": "2026-03-13T00:29:50Z",
+        "timeZone": "UTC"
+      },
+      "status": "confirmed",
+      "summary": "Fixture Event 172946",
+      "updated": "2026-03-12T00:29:51.132Z"
+    }
+  ],
+  "kind": "calendar#events",
+  "nextSyncToken": "CL-EnM6NmZMDEL-EnM6NmZMDGAUgkty-owMokty-owM=",
+  "summary": "Updated 172946",
+  "timeZone": "UTC",
+  "updated": "2026-03-12T00:29:51.132Z"
+}

@@ -1,0 +1,233 @@
+{
+  "resources": {
+    "ACL": {
+      "endpoints": [
+        {
+          "id": "calendar.acl.delete",
+          "method": "DELETE",
+          "path": "/calendars/{calendarId}/acl/{ruleId}"
+        },
+        {
+          "id": "calendar.acl.get",
+          "method": "GET",
+          "path": "/calendars/{calendarId}/acl/{ruleId}"
+        },
+        {
+          "id": "calendar.acl.insert",
+          "method": "POST",
+          "path": "/calendars/{calendarId}/acl"
+        },
+        {
+          "id": "calendar.acl.list",
+          "method": "GET",
+          "path": "/calendars/{calendarId}/acl"
+        },
+        {
+          "id": "calendar.acl.patch",
+          "method": "PATCH",
+          "path": "/calendars/{calendarId}/acl/{ruleId}"
+        },
+        {
+          "id": "calendar.acl.update",
+          "method": "PUT",
+          "path": "/calendars/{calendarId}/acl/{ruleId}"
+        },
+        {
+          "id": "calendar.acl.watch",
+          "method": "POST",
+          "path": "/calendars/{calendarId}/acl/watch"
+        }
+      ]
+    },
+    "CalendarList": {
+      "endpoints": [
+        {
+          "id": "calendar.calendarList.delete",
+          "method": "DELETE",
+          "path": "/users/me/calendarList/{calendarId}"
+        },
+        {
+          "id": "calendar.calendarList.get",
+          "method": "GET",
+          "path": "/users/me/calendarList/{calendarId}"
+        },
+        {
+          "id": "calendar.calendarList.insert",
+          "method": "POST",
+          "path": "/users/me/calendarList"
+        },
+        {
+          "id": "calendar.calendarList.list",
+          "method": "GET",
+          "path": "/users/me/calendarList"
+        },
+        {
+          "id": "calendar.calendarList.patch",
+          "method": "PATCH",
+          "path": "/users/me/calendarList/{calendarId}"
+        },
+        {
+          "id": "calendar.calendarList.update",
+          "method": "PUT",
+          "path": "/users/me/calendarList/{calendarId}"
+        },
+        {
+          "id": "calendar.calendarList.watch",
+          "method": "POST",
+          "path": "/users/me/calendarList/watch"
+        }
+      ]
+    },
+    "Calendars": {
+      "endpoints": [
+        {
+          "id": "calendar.calendars.clear",
+          "method": "POST",
+          "path": "/calendars/{calendarId}/clear"
+        },
+        {
+          "id": "calendar.calendars.delete",
+          "method": "DELETE",
+          "path": "/calendars/{calendarId}"
+        },
+        {
+          "id": "calendar.calendars.get",
+          "method": "GET",
+          "path": "/calendars/{calendarId}"
+        },
+        {
+          "id": "calendar.calendars.insert",
+          "method": "POST",
+          "path": "/calendars"
+        },
+        {
+          "id": "calendar.calendars.patch",
+          "method": "PATCH",
+          "path": "/calendars/{calendarId}"
+        },
+        {
+          "id": "calendar.calendars.update",
+          "method": "PUT",
+          "path": "/calendars/{calendarId}"
+        }
+      ]
+    },
+    "Channels": {
+      "endpoints": [
+        {
+          "id": "calendar.channels.stop",
+          "method": "POST",
+          "path": "/channels/stop"
+        }
+      ]
+    },
+    "Colors": {
+      "endpoints": [
+        {
+          "id": "calendar.colors.get",
+          "method": "GET",
+          "path": "/colors"
+        }
+      ]
+    },
+    "Events": {
+      "endpoints": [
+        {
+          "id": "calendar.events.delete",
+          "method": "DELETE",
+          "path": "/calendars/{calendarId}/events/{eventId}"
+        },
+        {
+          "id": "calendar.events.get",
+          "method": "GET",
+          "path": "/calendars/{calendarId}/events/{eventId}"
+        },
+        {
+          "id": "calendar.events.import",
+          "method": "POST",
+          "path": "/calendars/{calendarId}/events/import"
+        },
+        {
+          "id": "calendar.events.insert",
+          "method": "POST",
+          "path": "/calendars/{calendarId}/events"
+        },
+        {
+          "id": "calendar.events.instances",
+          "method": "GET",
+          "path": "/calendars/{calendarId}/events/{eventId}/instances"
+        },
+        {
+          "id": "calendar.events.list",
+          "method": "GET",
+          "path": "/calendars/{calendarId}/events"
+        },
+        {
+          "id": "calendar.events.move",
+          "method": "POST",
+          "path": "/calendars/{calendarId}/events/{eventId}/move"
+        },
+        {
+          "id": "calendar.events.patch",
+          "method": "PATCH",
+          "path": "/calendars/{calendarId}/events/{eventId}"
+        },
+        {
+          "id": "calendar.events.quickAdd",
+          "method": "POST",
+          "path": "/calendars/{calendarId}/events/quickAdd"
+        },
+        {
+          "id": "calendar.events.update",
+          "method": "PUT",
+          "path": "/calendars/{calendarId}/events/{eventId}"
+        },
+        {
+          "id": "calendar.events.watch",
+          "method": "POST",
+          "path": "/calendars/{calendarId}/events/watch"
+        }
+      ]
+    },
+    "FreeBusy": {
+      "endpoints": [
+        {
+          "id": "calendar.freebusy.query",
+          "method": "POST",
+          "path": "/freeBusy"
+        }
+      ]
+    },
+    "Profile": {
+      "endpoints": [
+        {
+          "id": "calendar.users.getProfile",
+          "resource": "Profile",
+          "method": "GET",
+          "path": "/users/{userId}/profile"
+        }
+      ]
+    },
+    "Settings": {
+      "endpoints": [
+        {
+          "id": "calendar.settings.get",
+          "method": "GET",
+          "path": "/users/me/settings/{setting}"
+        },
+        {
+          "id": "calendar.settings.list",
+          "method": "GET",
+          "path": "/users/me/settings"
+        },
+        {
+          "id": "calendar.settings.watch",
+          "method": "POST",
+          "path": "/users/me/settings/watch"
+        }
+      ]
+    }
+  },
+  "schemas": {},
+  "total_endpoints": 38
+}

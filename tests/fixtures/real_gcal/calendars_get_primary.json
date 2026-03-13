@@ -1,0 +1,12 @@
+{
+  "conferenceProperties": {
+    "allowedConferenceSolutionTypes": [
+      "hangoutsMeet"
+    ]
+  },
+  "etag": "\"InDzCDUZQUfecycAbrSSUCPRQ0k\"",
+  "id": "user@example.com",
+  "kind": "calendar#calendar",
+  "summary": "user@example.com",
+  "timeZone": "UTC"
+}

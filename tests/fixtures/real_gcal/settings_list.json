@@ -1,0 +1,85 @@
+{
+  "etag": "\"p32nt1qvnhacp60o\"",
+  "items": [
+    {
+      "etag": "\"1589814000000000\"",
+      "id": "autoAddHangouts",
+      "kind": "calendar#setting",
+      "value": "true"
+    },
+    {
+      "etag": "\"1589814000000000\"",
+      "id": "defaultEventLength",
+      "kind": "calendar#setting",
+      "value": "60"
+    },
+    {
+      "etag": "\"1772132009934380\"",
+      "id": "dateFieldOrder",
+      "kind": "calendar#setting",
+      "value": "MDY"
+    },
+    {
+      "etag": "\"1772132009934380\"",
+      "id": "weekStart",
+      "kind": "calendar#setting",
+      "value": "0"
+    },
+    {
+      "etag": "\"1772132009934380\"",
+      "id": "format24HourTime",
+      "kind": "calendar#setting",
+      "value": "false"
+    },
+    {
+      "etag": "\"1589814000000000\"",
+      "id": "hideInvitations",
+      "kind": "calendar#setting",
+      "value": "false"
+    },
+    {
+      "etag": "\"1589814000000000\"",
+      "id": "hideInvitationsSetting",
+      "kind": "calendar#setting",
+      "value": "NONE"
+    },
+    {
+      "etag": "\"1772132009934380\"",
+      "id": "locale",
+      "kind": "calendar#setting",
+      "value": "en"
+    },
+    {
+      "etag": "\"1589814000000000\"",
+      "id": "remindOnRespondedEventsOnly",
+      "kind": "calendar#setting",
+      "value": "false"
+    },
+    {
+      "etag": "\"1589814000000000\"",
+      "id": "showDeclinedEvents",
+      "kind": "calendar#setting",
+      "value": "true"
+    },
+    {
+      "etag": "\"1772132009934380\"",
+      "id": "timezone",
+      "kind": "calendar#setting",
+      "value": "UTC"
+    },
+    {
+      "etag": "\"1589814000000000\"",
+      "id": "useKeyboardShortcuts",
+      "kind": "calendar#setting",
+      "value": "true"
+    },
+    {
+      "etag": "\"1589814000000000\"",
+      "id": "hideWeekends",
+      "kind": "calendar#setting",
+      "value": "false"
+    }
+  ],
+  "kind": "calendar#settings",
+  "nextSyncToken": "00001773274673113135"
+}

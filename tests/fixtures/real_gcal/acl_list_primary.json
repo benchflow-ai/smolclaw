@@ -1,0 +1,27 @@
+{
+  "etag": "\"p32nt1qvnhacp60o\"",
+  "items": [
+    {
+      "etag": "\"00000000000000000000\"",
+      "id": "user:user@example.com",
+      "kind": "calendar#aclRule",
+      "role": "owner",
+      "scope": {
+        "type": "user",
+        "value": "user@example.com"
+      }
+    },
+    {
+      "etag": "\"00001773274668053723\"",
+      "id": "domain:example.com",
+      "kind": "calendar#aclRule",
+      "role": "reader",
+      "scope": {
+        "type": "domain",
+        "value": "example.com"
+      }
+    }
+  ],
+  "kind": "calendar#acl",
+  "nextSyncToken": "00001773274673113135"
+}

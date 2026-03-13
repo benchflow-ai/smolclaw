@@ -1,0 +1,20 @@
+{
+  "accessRole": "owner",
+  "backgroundColor": "#f83a22",
+  "colorId": "3",
+  "conferenceProperties": {
+    "allowedConferenceSolutionTypes": [
+      "hangoutsMeet"
+    ]
+  },
+  "dataOwner": "user@example.com",
+  "defaultReminders": [],
+  "description": "Updated desc",
+  "etag": "\"1773275388614991\"",
+  "foregroundColor": "#000000",
+  "id": "c_44e169aafbce7a91485c2f5c24d8d630aac033caa53b33f35a25d80cc4459c5b@group.calendar.google.com",
+  "kind": "calendar#calendarListEntry",
+  "selected": true,
+  "summary": "Updated 172946",
+  "timeZone": "UTC"
+}

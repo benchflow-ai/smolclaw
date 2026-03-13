@@ -1,0 +1,32 @@
+{
+  "kind": "calendar#event",
+  "etag": "\"3546693531991326\"",
+  "id": "mhvtrfm79a9skvh2cqvp2kihls",
+  "status": "confirmed",
+  "htmlLink": "https://www.google.com/calendar/event?eid=bWh2dHJmbTc5YTlza3ZoMmNxdnAya2lobHMgY19kNGFlNjgxNzEyNjhlM2M5ZTVjNzM3NDBmYzk3YmRhZmYwZWE3ODBhOTFjMmQyOWFkYTgyZmMxMDU1YTQzMTBkQGc",
+  "created": "2026-03-12T20:19:25.000Z",
+  "updated": "2026-03-12T20:19:25.995Z",
+  "summary": "Lunch",
+  "creator": {
+    "email": "dowhiz@deep-tutor.com"
+  },
+  "organizer": {
+    "email": "c_d4ae68171268e3c9e5c73740fc97bdaff0ea780a91c2d29ada82fc1055a4310d@group.calendar.google.com",
+    "displayName": "Fixture Move Temp",
+    "self": true
+  },
+  "start": {
+    "dateTime": "2026-03-13T12:00:00Z",
+    "timeZone": "UTC"
+  },
+  "end": {
+    "dateTime": "2026-03-13T13:00:00Z",
+    "timeZone": "UTC"
+  },
+  "iCalUID": "mhvtrfm79a9skvh2cqvp2kihls@google.com",
+  "sequence": 0,
+  "reminders": {
+    "useDefault": true
+  },
+  "eventType": "default"
+}

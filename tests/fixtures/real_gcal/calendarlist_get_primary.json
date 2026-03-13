@@ -1,0 +1,44 @@
+{
+  "accessRole": "owner",
+  "backgroundColor": "#9fe1e7",
+  "colorId": "14",
+  "conferenceProperties": {
+    "allowedConferenceSolutionTypes": [
+      "hangoutsMeet"
+    ]
+  },
+  "defaultReminders": [
+    {
+      "method": "popup",
+      "minutes": 10
+    }
+  ],
+  "etag": "\"1772132009934380\"",
+  "foregroundColor": "#000000",
+  "id": "user@example.com",
+  "kind": "calendar#calendarListEntry",
+  "notificationSettings": {
+    "notifications": [
+      {
+        "method": "email",
+        "type": "eventCreation"
+      },
+      {
+        "method": "email",
+        "type": "eventChange"
+      },
+      {
+        "method": "email",
+        "type": "eventCancellation"
+      },
+      {
+        "method": "email",
+        "type": "eventResponse"
+      }
+    ]
+  },
+  "primary": true,
+  "selected": true,
+  "summary": "user@example.com",
+  "timeZone": "UTC"
+}

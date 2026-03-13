@@ -1,0 +1,30 @@
+{
+  "kind": "calendar#event",
+  "etag": "\"3546693653246590\"",
+  "id": "lldpv3vone2ddnkkpek61fpttg",
+  "status": "cancelled",
+  "htmlLink": "https://www.google.com/calendar/event?eid=bGxkcHYzdm9uZTJkZG5ra3BlazYxZnB0dGcgY18wZWNmZTBkMjA3OGYxZjUyYzg4NGUxMTM3NjYxOTg0ZDhiMGI1ZDE3NzBjMzQyMzllNGI5NGEwMGI3ZDI3MDY4QGc",
+  "created": "2026-03-12T20:20:26.000Z",
+  "updated": "2026-03-12T20:20:26.623Z",
+  "summary": "Move Semantics Event",
+  "creator": {
+    "email": "dowhiz@deep-tutor.com"
+  },
+  "organizer": {
+    "email": "dowhiz@deep-tutor.com"
+  },
+  "start": {
+    "dateTime": "2026-03-13T20:20:26Z",
+    "timeZone": "UTC"
+  },
+  "end": {
+    "dateTime": "2026-03-13T21:20:26Z",
+    "timeZone": "UTC"
+  },
+  "iCalUID": "lldpv3vone2ddnkkpek61fpttg@google.com",
+  "sequence": 0,
+  "reminders": {
+    "useDefault": true
+  },
+  "eventType": "default"
+}

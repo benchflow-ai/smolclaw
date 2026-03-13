@@ -1,0 +1,10 @@
+{
+  "etag": "\"00001773275397113375\"",
+  "id": "user:fixture-user@example.com",
+  "kind": "calendar#aclRule",
+  "role": "writer",
+  "scope": {
+    "type": "user",
+    "value": "fixture-user@example.com"
+  }
+}
