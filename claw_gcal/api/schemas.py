@@ -130,6 +130,18 @@ class EventReminders(BaseModel):
     useDefault: bool = True
 
 
+class EventAttendee(BaseModel):
+    model_config = {"exclude_none": True}
+
+    email: str
+    displayName: str | None = None
+    responseStatus: str = "needsAction"
+    self: bool | None = None
+    optional: bool | None = None
+    organizer: bool | None = None
+    resource: bool | None = None
+
+
 class EventResource(BaseModel):
     model_config = {"exclude_none": True}
 
@@ -147,6 +159,7 @@ class EventResource(BaseModel):
     sequence: int = 0
     start: EventDateTime
     end: EventDateTime
+    attendees: list[EventAttendee] | None = None
     creator: EventActor | None = None
     organizer: EventActor | None = None
     reminders: EventReminders | None = None
@@ -179,6 +192,7 @@ class EventWriteRequest(BaseModel):
     iCalUID: str | None = None
     recurrence: list[str] | None = None
     status: str | None = None
+    attendees: list[EventAttendee] | None = None
 
 
 class EventPatchRequest(BaseModel):
@@ -189,6 +203,7 @@ class EventPatchRequest(BaseModel):
     start: EventDateTime | None = None
     end: EventDateTime | None = None
     recurrence: list[str] | None = None
+    attendees: list[EventAttendee] | None = None
 
 
 # --- ACL ---
