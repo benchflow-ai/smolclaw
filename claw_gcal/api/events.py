@@ -21,6 +21,7 @@ from .schemas import (
     ChannelRequest,
     ChannelResponse,
     EventActor,
+    EventAttendee,
     EventDateTime,
     EventListResponse,
     EventPatchRequest,
@@ -125,6 +126,18 @@ def _deserialize_recurrence(raw: str) -> list[str] | None:
     except json.JSONDecodeError:
         return None
     return data if isinstance(data, list) and data else None
+
+
+def _deserialize_attendees(raw: str) -> list[EventAttendee] | None:
+    if not raw:
+        return None
+    try:
+        data = json.loads(raw)
+    except json.JSONDecodeError:
+        return None
+    if not isinstance(data, list) or not data:
+        return None
+    return [EventAttendee(**a) for a in data if isinstance(a, dict) and "email" in a]
 
 
 _WEEKDAY_MAP: dict[str, int] = {
@@ -429,6 +442,7 @@ def _to_event_resource(event: Event) -> EventResource:
             is_date=bool(event.end_is_date),
             tz_name=tz,
         ),
+        attendees=_deserialize_attendees(event.attendees_json),
         creator=EventActor(email=actor_email, self=True) if actor_email else None,
         organizer=EventActor(email=actor_email, self=True, displayName=organizer_name) if actor_email else None,
         reminders=EventReminders(useDefault=True),
@@ -862,7 +876,10 @@ def _create_event_from_body(
         end_dt=end_dt,
         start_is_date=start_is_date,
         end_is_date=end_is_date,
-        attendees_json="[]",
+        attendees_json=json.dumps(
+            [a.model_dump(exclude_none=True) for a in body.attendees]
+            if body.attendees else []
+        ),
         created_at=now,
         updated_at=now,
         etag="",
@@ -953,10 +970,11 @@ def events_update(
     if body.iCalUID:
         event.i_cal_uid = body.iCalUID
     event.recurrence_json = json.dumps(body.recurrence or [])
+    event.attendees_json = json.dumps(
+        [a.model_dump(exclude_none=True) for a in body.attendees]
+        if body.attendees is not None else []
+    )
     event.sequence += 1
-    event.updated_at = datetime.now(timezone.utc)
-    event.etag = _compute_event_etag(event)
-
     db.commit()
     db.refresh(event)
     return _to_event_resource(event)
@@ -1001,6 +1019,10 @@ def events_patch(
         event.end_is_date = end_is_date
     if body.recurrence is not None:
         event.recurrence_json = json.dumps(body.recurrence)
+    if body.attendees is not None:
+        event.attendees_json = json.dumps(
+            [a.model_dump(exclude_none=True) for a in body.attendees]
+        )
     if _as_aware_utc(event.end_dt) <= _as_aware_utc(event.start_dt):
         raise HTTPException(400, "Event end must be after start")
 
