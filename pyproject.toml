@@ -30,6 +30,7 @@ all = ["smolclaws[mcp,gym,dev]"]
 [project.scripts]
 smolclaw = "claw_gmail.cli:cli"
 smolclaw-gcal = "claw_gcal.cli:cli"
+smolclaw-discord = "claw_discord.cli:cli"
 
 [project.urls]
 Homepage = "https://smolclaw.com"
@@ -37,4 +38,4 @@ Repository = "https://github.com/benchflow-ai/smolclaw"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["claw_gmail*", "claw_gcal*"]
+include = ["claw_gmail*", "claw_gcal*", "claw_discord*"]

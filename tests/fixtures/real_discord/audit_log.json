@@ -1,0 +1,222 @@
+{
+  "audit_log_entries": [
+    {
+      "id": "1482781783295656179",
+      "action_type": 40,
+      "user_id": "1482779431687946330",
+      "target_id": "1482781783295656178",
+      "changes": [
+        {
+          "key": "code",
+          "new_value": "2qUUmAD"
+        },
+        {
+          "key": "channel_id",
+          "new_value": "1482779235113504854"
+        },
+        {
+          "key": "inviter_id",
+          "new_value": "1482779431687946330"
+        },
+        {
+          "key": "uses",
+          "new_value": 0
+        },
+        {
+          "key": "max_uses",
+          "new_value": 1
+        },
+        {
+          "key": "max_age",
+          "new_value": 3600
+        },
+        {
+          "key": "temporary",
+          "new_value": false
+        },
+        {
+          "key": "flags",
+          "new_value": 0
+        }
+      ]
+    },
+    {
+      "id": "1482781767139328155",
+      "action_type": 50,
+      "user_id": "1482779431687946330",
+      "target_id": "1482781767139328154",
+      "changes": [
+        {
+          "key": "channel_id",
+          "new_value": "1482779235113504854"
+        },
+        {
+          "key": "application_id",
+          "new_value": "1482779431687946330"
+        },
+        {
+          "key": "name",
+          "new_value": "smolclaw-test-hook"
+        },
+        {
+          "key": "type",
+          "new_value": 1
+        }
+      ]
+    },
+    {
+      "id": "1482781760235245609",
+      "action_type": 110,
+      "user_id": "1482779431687946330",
+      "target_id": "1482781732133666846",
+      "changes": [
+        {
+          "key": "name",
+          "new_value": "smolclaw-test-thread"
+        },
+        {
+          "key": "type",
+          "new_value": 11
+        },
+        {
+          "key": "archived",
+          "new_value": false
+        },
+        {
+          "key": "locked",
+          "new_value": false
+        },
+        {
+          "key": "auto_archive_duration",
+          "new_value": 4320
+        },
+        {
+          "key": "rate_limit_per_user",
+          "new_value": 0
+        },
+        {
+          "key": "flags",
+          "new_value": 0
+        }
+      ]
+    },
+    {
+      "id": "1482781752274583616",
+      "action_type": 31,
+      "user_id": "1482779431687946330",
+      "target_id": "1482781750512975892",
+      "changes": [
+        {
+          "key": "name",
+          "new_value": "smolclaw-renamed",
+          "old_value": "smolclaw-test-role"
+        }
+      ]
+    },
+    {
+      "id": "1482781750512975893",
+      "action_type": 30,
+      "user_id": "1482779431687946330",
+      "target_id": "1482781750512975892",
+      "changes": [
+        {
+          "key": "name",
+          "new_value": "smolclaw-test-role"
+        },
+        {
+          "key": "permissions",
+          "new_value": "2248473465835073"
+        },
+        {
+          "key": "color",
+          "new_value": 16711680
+        },
+        {
+          "key": "hoist",
+          "new_value": true
+        },
+        {
+          "key": "mentionable",
+          "new_value": false
+        },
+        {
+          "key": "colors",
+          "new_value": {
+            "primary_color": 16711680,
+            "secondary_color": null,
+            "tertiary_color": null
+          }
+        }
+      ]
+    }
+  ],
+  "users": [
+    {
+      "id": "1482779431687946330",
+      "username": "smolclaw-capture",
+      "avatar": null,
+      "discriminator": "8456",
+      "public_flags": 0,
+      "flags": 0,
+      "bot": true,
+      "banner": null,
+      "accent_color": null,
+      "global_name": null,
+      "avatar_decoration_data": null,
+      "collectibles": null,
+      "display_name_styles": null,
+      "banner_color": null,
+      "clan": null,
+      "primary_guild": null
+    }
+  ],
+  "integrations": [],
+  "webhooks": [
+    {
+      "application_id": "1482779431687946330",
+      "avatar": null,
+      "channel_id": "1482779235113504854",
+      "guild_id": "1482779234547142738",
+      "id": "1482781767139328154",
+      "name": "smolclaw-test-hook",
+      "type": 1
+    }
+  ],
+  "guild_scheduled_events": [],
+  "threads": [
+    {
+      "id": "1482781732133666846",
+      "type": 11,
+      "last_message_id": "1482781760235245608",
+      "flags": 0,
+      "guild_id": "1482779234547142738",
+      "name": "smolclaw-test-thread",
+      "parent_id": "1482779235113504854",
+      "rate_limit_per_user": 0,
+      "bitrate": 64000,
+      "user_limit": 0,
+      "rtc_region": null,
+      "owner_id": "1482779431687946330",
+      "thread_metadata": {
+        "archived": false,
+        "archive_timestamp": "2026-03-15T16:45:20.386000+00:00",
+        "auto_archive_duration": 4320,
+        "locked": false,
+        "create_timestamp": "2026-03-15T16:45:20.386000+00:00"
+      },
+      "message_count": 0,
+      "member_count": 1,
+      "total_message_sent": 0,
+      "member": {
+        "id": "1482781732133666846",
+        "user_id": "1482779431687946330",
+        "join_timestamp": "2026-03-15T16:45:20.387000+00:00",
+        "flags": 1,
+        "muted": false,
+        "mute_config": null
+      }
+    }
+  ],
+  "application_commands": [],
+  "auto_moderation_rules": []
+}
